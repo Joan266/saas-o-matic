@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"\nimport sys, json, os\ndata = json.load(sys.stdin)\npath = data.get('tool_input', {}).get('file_path', '')\nif path.endswith('.py') and os.path.exists(path):\n    result = os.system(f'ruff check --fix \\\"{path}\\\" && ruff format \\\"{path}\\\"')\n    if result != 0:\n        print(f'RUFF ERROR: {path}', file=sys.stderr)\n\""
+          }
+        ]
+      }
+    ]
+  }
+}
