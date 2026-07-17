@@ -75,41 +75,6 @@
           </div>
         </div>
 
-        <!-- Storage slider -->
-        <div class="slider-group">
-          <div class="slider-header">
-            <label class="slider-label">Almacenamiento</label>
-            <span class="slider-value">{{ storageGb() }} GB</span>
-          </div>
-          <input
-            type="range"
-            class="slider"
-            min="1"
-            max="1000"
-            step="1"
-            [value]="storageGb()"
-            aria-label="Almacenamiento en GB"
-            (input)="onStorageChange($event)"
-          />
-        </div>
-
-        <!-- API calls slider -->
-        <div class="slider-group">
-          <div class="slider-header">
-            <label class="slider-label">Llamadas API</label>
-            <span class="slider-value">{{ apiCallsK() }}k</span>
-          </div>
-          <input
-            type="range"
-            class="slider"
-            min="0"
-            max="1000"
-            step="10"
-            [value]="apiCallsK()"
-            aria-label="Llamadas API en miles"
-            (input)="onApiCallsChange($event)"
-          />
-        </div>
       </div>
 
       <!-- RIGHT: Projection -->

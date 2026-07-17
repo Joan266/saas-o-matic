@@ -26,8 +26,6 @@ export class SimulationFormComponent implements OnInit {
   protected readonly saving = signal(false);
 
   protected readonly activeUsers = signal(15);
-  protected readonly storageGb = signal(100);
-  protected readonly apiCallsK = signal(50);
 
   // Computed billing values
   protected readonly baseCost = computed(() => calcBaseCost(this.activeUsers()));
@@ -63,14 +61,6 @@ export class SimulationFormComponent implements OnInit {
     this.activeUsers.set(Number((event.target as HTMLInputElement).value));
   }
 
-  protected onStorageChange(event: Event): void {
-    this.storageGb.set(Number((event.target as HTMLInputElement).value));
-  }
-
-  protected onApiCallsChange(event: Event): void {
-    this.apiCallsK.set(Number((event.target as HTMLInputElement).value));
-  }
-
   protected onSave(): void {
     if (this.saving() || !this.customer()) return;
     this.saving.set(true);
@@ -78,8 +68,8 @@ export class SimulationFormComponent implements OnInit {
     this.api.createSimulation({
       customerId: this.customer()!.id,
       activeUsers: this.activeUsers(),
-      storageGb: this.storageGb(),
-      apiCalls: this.apiCallsK() * 1000,
+      storageGb: 1,
+      apiCalls: 0,
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.router.navigate(['/customers', this.customer()!.id]);
