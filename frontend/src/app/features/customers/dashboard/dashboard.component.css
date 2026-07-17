@@ -122,7 +122,8 @@
 
 .table-header {
   display: grid;
-  grid-template-columns: 2.5fr 1.2fr 1.2fr 1fr 1.2fr 80px;
+  grid-template-columns: 2.5fr 1.2fr 1.2fr 1.2fr 1.2fr 80px;
+  column-gap: 0.75rem;
   padding: 0.625rem 1.25rem;
   border-bottom: 1px solid var(--border-subtle);
   font-size: 0.6875rem;
@@ -134,7 +135,8 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 2.5fr 1.2fr 1.2fr 1fr 1.2fr 80px;
+  grid-template-columns: 2.5fr 1.2fr 1.2fr 1.2fr 1.2fr 80px;
+  column-gap: 0.75rem;
   padding: 0.875rem 1.25rem;
   align-items: center;
   border-bottom: 1px solid var(--border-subtle);
