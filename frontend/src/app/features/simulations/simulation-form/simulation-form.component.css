@@ -59,12 +59,30 @@
   color: var(--text-secondary);
 }
 
-.slider-value {
+.users-input {
+  width: 72px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--accent);
+  font-family: 'Space Grotesk', sans-serif;
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--accent);
+  padding: 3px 6px;
+  text-align: center;
   font-variant-numeric: tabular-nums;
+  transition: border-color 0.15s;
 }
+
+.users-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Ocultar flechas del input numérico */
+.users-input::-webkit-outer-spin-button,
+.users-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.users-input[type=number] { -moz-appearance: textfield; }
 
 /* ── Range slider ────────────────────────────────────────────────── */
 .slider-track-wrapper {

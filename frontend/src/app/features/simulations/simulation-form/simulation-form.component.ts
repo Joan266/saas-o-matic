@@ -35,10 +35,13 @@ export class SimulationFormComponent implements OnInit {
   protected readonly totalEur = computed(() => this.baseCost() + this.taxAmount());
   protected readonly totalDisplay = computed(() => this.currency.format(this.totalEur()));
 
+  // Slider range caps at 200; actual value can exceed it via the number input
+  protected readonly sliderMax = 200;
+  protected readonly sliderValue = computed(() => Math.min(this.activeUsers(), this.sliderMax));
+
   // Tier threshold markers: fixed percentages based on slider range (1-200)
   protected readonly tier1Pct = '5%';   // 10/200
   protected readonly tier2Pct = '25%';  // 50/200
-  protected readonly sliderMax = 200;
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -59,6 +62,11 @@ export class SimulationFormComponent implements OnInit {
 
   protected onUsersChange(event: Event): void {
     this.activeUsers.set(Number((event.target as HTMLInputElement).value));
+  }
+
+  protected onUsersInputChange(event: Event): void {
+    const val = Number((event.target as HTMLInputElement).value);
+    if (val >= 1) this.activeUsers.set(Math.floor(val));
   }
 
   protected onSave(): void {

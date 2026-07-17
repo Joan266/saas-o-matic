@@ -38,7 +38,14 @@
         <div class="slider-group">
           <div class="slider-header">
             <label class="slider-label">Usuarios activos</label>
-            <span class="slider-value">{{ activeUsers() }}</span>
+            <input
+              type="number"
+              class="users-input"
+              min="1"
+              [value]="activeUsers()"
+              aria-label="Número de usuarios activos"
+              (input)="onUsersInputChange($event)"
+            />
           </div>
 
           <div class="slider-track-wrapper">
@@ -48,8 +55,8 @@
               min="1"
               [max]="sliderMax"
               step="1"
-              [value]="activeUsers()"
-              aria-label="Usuarios activos"
+              [value]="sliderValue()"
+              aria-label="Usuarios activos (slider)"
               (input)="onUsersChange($event)"
             />
             <!-- Tier markers -->
