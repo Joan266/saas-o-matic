@@ -1,0 +1,39 @@
+@use '@angular/material' as mat;
+
+// Dark amber theme for SaaS-O-Matic
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$orange-palette,
+        theme-type: dark,
+      ),
+      typography: 'Space Grotesk',
+      density: -1,
+    )
+  );
+
+  // Override Material system variables to match our design
+  --mat-sys-primary: #f2a33c;
+  --mat-sys-on-primary: #1a0f00;
+  --mat-sys-primary-container: #2a1a00;
+  --mat-sys-on-primary-container: #f2a33c;
+  --mat-sys-surface: #0b0d10;
+  --mat-sys-surface-container: #141619;
+  --mat-sys-surface-container-high: #1e2126;
+  --mat-sys-on-surface: #e8eaed;
+  --mat-sys-on-surface-variant: #9ca3af;
+  --mat-sys-outline: #2d3139;
+  --mat-sys-outline-variant: #1e2329;
+  --mat-sys-error: #f87171;
+  --mat-sys-on-error: #1a0000;
+}
+
+body {
+  color-scheme: dark;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}

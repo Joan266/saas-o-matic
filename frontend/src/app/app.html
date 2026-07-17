@@ -1,0 +1,21 @@
+<header class="navbar">
+  <a class="navbar__brand" routerLink="/">
+    <span class="navbar__logo">S</span>
+    <span class="navbar__title">SaaS-O-Matic</span>
+    <span class="navbar__badge">INTERNO</span>
+  </a>
+
+  <div class="navbar__actions">
+    @if (currencyService.error()) {
+      <span class="navbar__currency-error" title="{{ currencyService.error() }}">
+        ⚠ EUR (sin conexión)
+      </span>
+    }
+    <app-currency-selector />
+    <div class="navbar__avatar">LM</div>
+  </div>
+</header>
+
+<main class="main-content">
+  <router-outlet />
+</main>
