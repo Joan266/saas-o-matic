@@ -8,7 +8,7 @@
  */
 
 const DNI_LETTERS = 'TRWAGMYFPDXBNJZSQVHLCKE';
-const NIE_PREFIX: Record<string, string> = { X: '0', Y: '1', Z: '2' };
+const NIE_PREFIX: Record<'X' | 'Y' | 'Z', string> = { X: '0', Y: '1', Z: '2' };
 const CIF_LETTERS = 'JABCDEFGHI';
 const CIF_MUST_LETTER = new Set(['P', 'Q', 'R', 'S', 'N', 'W']);
 const CIF_MUST_DIGIT = new Set(['A', 'B', 'E', 'H']);
@@ -50,7 +50,7 @@ function validateDni(fid: string): FiscalValidationResult {
 }
 
 function validateNie(fid: string): FiscalValidationResult {
-  const numberStr = NIE_PREFIX[fid[0]] + fid.slice(1, 8);
+  const numberStr = NIE_PREFIX[fid[0] as 'X' | 'Y' | 'Z'] + fid.slice(1, 8);
   const expected = DNI_LETTERS[parseInt(numberStr, 10) % 23];
   if (fid[8] !== expected) {
     return {

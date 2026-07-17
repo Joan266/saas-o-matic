@@ -78,6 +78,7 @@
         <div class="currency-tabs">
           @for (c of displayCurrencies; track c) {
             <button
+              type="button"
               class="currency-tab"
               [class.currency-tab--active]="currency.currentCurrency() === c"
               (click)="setCurrency(c)"
@@ -105,7 +106,7 @@
           </div>
           @for (sim of simulations(); track sim.id) {
             <div class="sim-row-wrapper">
-              <div class="sim-row" (click)="toggleExpand(sim.id)">
+              <button type="button" class="sim-row" (click)="toggleExpand(sim.id)" [attr.aria-expanded]="expandedSimId() === sim.id">
                 <span class="sim-date">{{ formatDate(sim.createdAt) }}</span>
                 <span>{{ sim.activeUsers }} u.</span>
                 <span>{{ sim.storageGb }} GB</span>
@@ -114,7 +115,7 @@
                 <span class="sim-open" [class.sim-open--expanded]="expandedSimId() === sim.id">
                   {{ expandedSimId() === sim.id ? '▲' : '▼' }}
                 </span>
-              </div>
+              </button>
 
               @if (expandedSimId() === sim.id) {
                 <div class="sim-breakdown">

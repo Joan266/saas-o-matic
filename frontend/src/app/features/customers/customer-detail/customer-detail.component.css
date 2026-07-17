@@ -162,6 +162,12 @@
   transition: background 0.12s;
   font-size: 0.8125rem;
   color: var(--text-secondary);
+  /* reset button defaults */
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .sim-row:hover { background: var(--surface-raised); }

@@ -1,5 +1,4 @@
 import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
@@ -14,7 +13,7 @@ const DISPLAY_CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP'];
 @Component({
   selector: 'app-simulation-form',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './simulation-form.component.html',
   styleUrl: './simulation-form.component.css',
 })
@@ -43,13 +42,14 @@ export class SimulationFormComponent implements OnInit {
   protected readonly totalEur = computed(() => this.baseCost() + this.taxAmount());
   protected readonly totalDisplay = computed(() => this.currency.format(this.totalEur()));
 
-  // Tier threshold markers for slider UI
-  protected readonly tier1Max = 10;
-  protected readonly tier2Max = 50;
+  // Tier threshold markers: fixed percentages based on slider range (1-200)
+  protected readonly tier1Pct = '5%';   // 10/200
+  protected readonly tier2Pct = '25%';  // 50/200
   protected readonly sliderMax = 200;
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (!id) { this.router.navigate(['/']); return; }
     this.api.getCustomer(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -78,18 +78,6 @@ export class SimulationFormComponent implements OnInit {
 
   protected setCurrency(c: Currency): void {
     this.currency.setCurrency(c);
-  }
-
-  protected tier1Pct(): string {
-    return `${(this.tier1Max / this.sliderMax) * 100}%`;
-  }
-
-  protected tier2Pct(): string {
-    return `${(this.tier2Max / this.sliderMax) * 100}%`;
-  }
-
-  protected currentPct(): number {
-    return (this.activeUsers() / this.sliderMax) * 100;
   }
 
   protected onSave(): void {

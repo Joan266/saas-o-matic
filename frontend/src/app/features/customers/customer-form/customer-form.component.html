@@ -21,9 +21,10 @@
           type="text"
           placeholder="Nombre de la empresa"
           formControlName="company"
+          aria-describedby="company-error"
         />
         @if (fieldInvalid('company')) {
-          <span class="field__error">El nombre de empresa es obligatorio (mín. 2 caracteres).</span>
+          <span id="company-error" class="field__error">El nombre de empresa es obligatorio (mín. 2 caracteres).</span>
         }
       </div>
 
@@ -59,17 +60,20 @@
         <input
           id="fiscalId"
           class="field__input"
-          [class.field__input--error]="fiscalIdError()"
-          [class.field__input--valid]="!fiscalIdError() && fiscalIdType()"
+          [class.field__input--error]="fiscalIdTouched && fiscalIdError()"
+          [class.field__input--valid]="fiscalIdTouched && !fiscalIdError() && fiscalIdType()"
           type="text"
           placeholder="ej. B83584466"
           formControlName="fiscalId"
+          aria-describedby="fiscalId-feedback"
         />
-        @if (fiscalIdError()) {
-          <span class="field__error">{{ fiscalIdError() }}</span>
-        } @else if (!fiscalIdError() && fiscalIdType()) {
-          <span class="field__hint">{{ fiscalIdType() }} válido.</span>
-        }
+        <span id="fiscalId-feedback">
+          @if (fiscalIdTouched && fiscalIdError()) {
+            <span class="field__error">{{ fiscalIdError() }}</span>
+          } @else if (fiscalIdTouched && !fiscalIdError() && fiscalIdType()) {
+            <span class="field__hint">{{ fiscalIdType() }} válido.</span>
+          }
+        </span>
       </div>
 
       <!-- Email -->
@@ -82,9 +86,10 @@
           type="email"
           placeholder="contacto@empresa.com"
           formControlName="email"
+          aria-describedby="email-error"
         />
         @if (fieldInvalid('email')) {
-          <span class="field__error">Introduce un email válido.</span>
+          <span id="email-error" class="field__error">Introduce un email válido.</span>
         }
       </div>
 

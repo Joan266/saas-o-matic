@@ -31,6 +31,10 @@ export class CustomerFormComponent implements OnInit {
   protected readonly fiscalIdError = signal<string | null>(null);
   protected readonly fiscalIdType = signal<string | null>(null);
 
+  protected get fiscalIdTouched(): boolean {
+    return !!this.form.get('fiscalId')?.touched;
+  }
+
   protected readonly countries = COUNTRIES;
   protected readonly plans = PLANS;
 

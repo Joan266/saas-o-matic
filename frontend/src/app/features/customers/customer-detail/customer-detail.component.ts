@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
@@ -32,6 +32,12 @@ export class CustomerDetailComponent implements OnInit {
 
   protected readonly displayCurrencies = DISPLAY_CURRENCIES;
 
+  protected readonly lastSim = computed(() => {
+    const sims = this.simulations();
+    if (!sims.length) return '—';
+    return new Date(sims[sims.length - 1].createdAt).toLocaleDateString('es-ES');
+  });
+
   protected readonly avatarColors = [
     '#c84b31', '#2e4057', '#1b6ca8', '#4a235a', '#1e5631',
     '#7d3c98', '#1a5276', '#784212', '#1b4f72', '#4a235a',
@@ -39,6 +45,7 @@ export class CustomerDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (!id) { this.router.navigate(['/']); return; }
     forkJoin([this.api.getCustomer(id), this.api.getSimulations(id)] as const)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -72,12 +79,6 @@ export class CustomerDetailComponent implements OnInit {
 
   protected taxRate(code: string): number {
     return (TAX_RATES[code] ?? 0) * 100;
-  }
-
-  protected lastSim(): string {
-    const sims = this.simulations();
-    if (!sims.length) return '—';
-    return new Date(sims[sims.length - 1].createdAt).toLocaleDateString('es-ES');
   }
 
   protected formatDate(iso: string): string {

@@ -49,14 +49,15 @@
               [max]="sliderMax"
               step="1"
               [value]="activeUsers()"
+              aria-label="Usuarios activos"
               (input)="onUsersChange($event)"
             />
             <!-- Tier markers -->
             <div class="tier-markers">
-              <div class="tier-marker" [style.left]="tier1Pct()">
+              <div class="tier-marker" [style.left]="tier1Pct">
                 <span class="tier-marker__label">10</span>
               </div>
-              <div class="tier-marker" [style.left]="tier2Pct()">
+              <div class="tier-marker" [style.left]="tier2Pct">
                 <span class="tier-marker__label">50</span>
               </div>
             </div>
@@ -87,6 +88,7 @@
             max="1000"
             step="1"
             [value]="storageGb()"
+            aria-label="Almacenamiento en GB"
             (input)="onStorageChange($event)"
           />
         </div>
@@ -104,6 +106,7 @@
             max="1000"
             step="10"
             [value]="apiCallsK()"
+            aria-label="Llamadas API en miles"
             (input)="onApiCallsChange($event)"
           />
         </div>
@@ -116,6 +119,7 @@
           <div class="currency-tabs">
             @for (c of displayCurrencies; track c) {
               <button
+                type="button"
                 class="currency-tab"
                 [class.currency-tab--active]="currency.currentCurrency() === c"
                 (click)="setCurrency(c)"
