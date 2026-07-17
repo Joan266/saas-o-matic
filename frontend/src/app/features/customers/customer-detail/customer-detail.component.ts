@@ -73,8 +73,9 @@ export class CustomerDetailComponent implements OnInit {
   }
 
   protected formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('es-ES', {
+    return new Date(iso).toLocaleString('es-ES', {
       day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     });
   }
 
