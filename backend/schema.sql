@@ -9,6 +9,14 @@ CREATE TABLE IF NOT EXISTS customers (
     updated_at  TEXT    DEFAULT (datetime('now'))
 );
 
+-- Keep updated_at current automatically on every UPDATE
+CREATE TRIGGER IF NOT EXISTS customers_updated_at
+AFTER UPDATE ON customers
+FOR EACH ROW
+BEGIN
+    UPDATE customers SET updated_at = datetime('now') WHERE id = OLD.id;
+END;
+
 CREATE TABLE IF NOT EXISTS simulations (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id   INTEGER NOT NULL REFERENCES customers(id),
