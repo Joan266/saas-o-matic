@@ -1,8 +1,7 @@
-import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, Subject, switchMap, startWith } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { CurrencyService } from '../../../core/services/currency.service';
 import { Customer, Stats, COUNTRY_LABELS } from '../../../core/models/types';
@@ -24,7 +23,14 @@ export class DashboardComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly searchQuery = signal('');
 
-  private readonly search$ = new Subject<string>();
+  protected readonly filteredCustomers = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    if (!q) return this.customers();
+    return this.customers().filter(c =>
+      c.company.toLowerCase().includes(q) ||
+      c.fiscalId.toLowerCase().includes(q)
+    );
+  });
 
   protected readonly countryLabel = (code: string) =>
     COUNTRY_LABELS[code] ?? code;
@@ -53,17 +59,8 @@ export class DashboardComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({ next: s => this.stats.set(s) });
 
-    this.search$
-      .pipe(
-        startWith(''),
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap(q => {
-          this.loading.set(true);
-          return this.api.getCustomers(q || undefined);
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
+    this.api.getCustomers()
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: customers => {
           this.customers.set(customers);
@@ -75,7 +72,6 @@ export class DashboardComponent implements OnInit {
 
   onSearch(value: string): void {
     this.searchQuery.set(value);
-    this.search$.next(value);
   }
 
   protected formatLastSim(iso: string | undefined): string {

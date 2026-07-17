@@ -80,7 +80,7 @@
       }
 
     <!-- Empty state -->
-    } @else if (customers().length === 0) {
+    } @else if (filteredCustomers().length === 0) {
       <div class="empty-state">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" class="empty-state__icon">
           <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
@@ -101,7 +101,7 @@
       <div class="table-header">
         <span>EMPRESA</span><span>ID. FISCAL</span><span>PAÍS</span><span>PLAN</span><span>ÚLT. SIMULACIÓN</span><span></span>
       </div>
-      @for (c of customers(); track c.id) {
+      @for (c of filteredCustomers(); track c.id) {
         <div class="table-row" [routerLink]="['/customers', c.id]">
           <div class="company-cell">
             <div class="avatar" [style.background]="avatarColor(c.company)">
