@@ -12,6 +12,12 @@ El backend estaba completo (89 tests). La infraestructura del frontend (ApiServi
 ErrorInterceptor, billing.utils.ts, tipos, tokens de diseño) también estaba hecha.
 Restaban 3 stubs vacíos + el validador fiscal en TypeScript.
 
+> **Nota sobre el historial git:** La infraestructura core (commit `5a19e61`) aparece como el
+> commit más reciente en la rama porque los archivos estuvieron sin commitear durante el desarrollo
+> y se añadieron al final junto con el resto de archivos sin traquear. El orden de desarrollo
+> real fue: infraestructura → stubs → implementación → review. Los commits `da4dc77` y `185418a`
+> reflejan ese trabajo correctamente.
+
 ### Prompt enviado a la IA
 Plan estructurado con specs completas por componente:
 - Estado exacto (qué Signals, qué computed())
