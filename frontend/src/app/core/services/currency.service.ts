@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { retry, timeout } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Currency, CURRENCIES } from '../models/types';
 
@@ -32,6 +33,10 @@ export class CurrencyService {
     this.loading.set(true);
     this.http
       .get<ExchangeRateResponse>(environment.exchangeRateUrl)
+      .pipe(
+        timeout(5000),
+        retry(2),
+      )
       .subscribe({
         next: (data) => {
           this.rates.set(data.rates);
