@@ -1,0 +1,109 @@
+<div class="form-page">
+  <nav class="breadcrumb">
+    <a routerLink="/" class="breadcrumb__link">Clientes</a>
+    <span class="breadcrumb__sep">/</span>
+    <span class="breadcrumb__current">Nuevo cliente</span>
+  </nav>
+
+  <div class="form-card card">
+    <h1 class="form-title">Nuevo cliente corporativo</h1>
+    <p class="form-subtitle">Rellena los datos para registrar un nuevo cliente en el sistema de billing.</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form" novalidate>
+
+      <!-- Company -->
+      <div class="field">
+        <label class="field__label" for="company">Empresa <span class="required">*</span></label>
+        <input
+          id="company"
+          class="field__input"
+          [class.field__input--error]="fieldInvalid('company')"
+          type="text"
+          placeholder="Nombre de la empresa"
+          formControlName="company"
+        />
+        @if (fieldInvalid('company')) {
+          <span class="field__error">El nombre de empresa es obligatorio (mín. 2 caracteres).</span>
+        }
+      </div>
+
+      <!-- Country + Plan in row -->
+      <div class="field-row">
+        <div class="field">
+          <label class="field__label" for="country">País <span class="required">*</span></label>
+          <select id="country" class="field__select" formControlName="country">
+            @for (c of countries; track c.code) {
+              <option [value]="c.code">{{ c.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="plan">Plan <span class="required">*</span></label>
+          <select id="plan" class="field__select" formControlName="plan">
+            @for (p of plans; track p.value) {
+              <option [value]="p.value">{{ p.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Fiscal ID -->
+      <div class="field">
+        <label class="field__label" for="fiscalId">
+          Identificador fiscal <span class="required">*</span>
+          @if (fiscalIdType()) {
+            <span class="fiscal-type-tag">{{ fiscalIdType() }}</span>
+          }
+        </label>
+        <input
+          id="fiscalId"
+          class="field__input"
+          [class.field__input--error]="fiscalIdError()"
+          [class.field__input--valid]="!fiscalIdError() && fiscalIdType()"
+          type="text"
+          placeholder="ej. B83584466"
+          formControlName="fiscalId"
+        />
+        @if (fiscalIdError()) {
+          <span class="field__error">{{ fiscalIdError() }}</span>
+        } @else if (!fiscalIdError() && fiscalIdType()) {
+          <span class="field__hint">{{ fiscalIdType() }} válido.</span>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="field">
+        <label class="field__label" for="email">Email <span class="required">*</span></label>
+        <input
+          id="email"
+          class="field__input"
+          [class.field__input--error]="fieldInvalid('email')"
+          type="email"
+          placeholder="contacto@empresa.com"
+          formControlName="email"
+        />
+        @if (fieldInvalid('email')) {
+          <span class="field__error">Introduce un email válido.</span>
+        }
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <a routerLink="/" class="btn-secondary">Cancelar</a>
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="form.invalid || submitting()"
+        >
+          @if (submitting()) {
+            Guardando...
+          } @else {
+            Crear cliente
+          }
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

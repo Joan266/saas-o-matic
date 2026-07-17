@@ -1,0 +1,171 @@
+@if (loadingCustomer()) {
+  <div class="sim-page">
+    <div class="skeleton" style="height:16px;width:200px;margin-bottom:1.75rem"></div>
+    <div class="panels">
+      <div class="panel card">
+        <div class="skeleton" style="height:20px;width:160px;margin-bottom:1.5rem"></div>
+        @for (i of [1,2,3]; track i) {
+          <div class="skeleton" style="height:80px;width:100%;margin-bottom:1rem"></div>
+        }
+      </div>
+      <div class="panel card">
+        <div class="skeleton" style="height:20px;width:140px;margin-bottom:2rem"></div>
+        <div class="skeleton" style="height:60px;width:100%;margin-bottom:1rem"></div>
+        <div class="skeleton" style="height:120px;width:100%"></div>
+      </div>
+    </div>
+  </div>
+
+} @else if (customer()) {
+  <div class="sim-page">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a routerLink="/" class="breadcrumb__link">Clientes</a>
+      <span class="breadcrumb__sep">/</span>
+      <a [routerLink]="['/customers', customer()!.id]" class="breadcrumb__link">{{ customer()!.company }}</a>
+      <span class="breadcrumb__sep">/</span>
+      <span class="breadcrumb__current">Nueva simulación</span>
+    </nav>
+
+    <div class="panels">
+
+      <!-- LEFT: Sliders -->
+      <div class="panel card">
+        <h2 class="panel__title">Parámetros de uso</h2>
+
+        <!-- Users slider -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label class="slider-label">Usuarios activos</label>
+            <span class="slider-value">{{ activeUsers() }}</span>
+          </div>
+
+          <div class="slider-track-wrapper">
+            <input
+              type="range"
+              class="slider"
+              min="1"
+              [max]="sliderMax"
+              step="1"
+              [value]="activeUsers()"
+              (input)="onUsersChange($event)"
+            />
+            <!-- Tier markers -->
+            <div class="tier-markers">
+              <div class="tier-marker" [style.left]="tier1Pct()">
+                <span class="tier-marker__label">10</span>
+              </div>
+              <div class="tier-marker" [style.left]="tier2Pct()">
+                <span class="tier-marker__label">50</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tier breakdown preview -->
+          <div class="tier-preview">
+            @for (tier of tierBreakdown(); track tier.label) {
+              <div class="tier-row">
+                <span class="tier-row__label">{{ tier.label }}</span>
+                <span class="tier-row__detail">{{ tier.users }} u. × {{ tier.rate }}€</span>
+                <span class="tier-row__cost">{{ tier.subtotal | number:'1.2-2' }}€</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Storage slider -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label class="slider-label">Almacenamiento</label>
+            <span class="slider-value">{{ storageGb() }} GB</span>
+          </div>
+          <input
+            type="range"
+            class="slider"
+            min="1"
+            max="1000"
+            step="1"
+            [value]="storageGb()"
+            (input)="onStorageChange($event)"
+          />
+        </div>
+
+        <!-- API calls slider -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label class="slider-label">Llamadas API</label>
+            <span class="slider-value">{{ apiCallsK() }}k</span>
+          </div>
+          <input
+            type="range"
+            class="slider"
+            min="0"
+            max="1000"
+            step="10"
+            [value]="apiCallsK()"
+            (input)="onApiCallsChange($event)"
+          />
+        </div>
+      </div>
+
+      <!-- RIGHT: Projection -->
+      <div class="panel panel--right card">
+        <div class="projection-header">
+          <h2 class="panel__title">Proyección mensual</h2>
+          <div class="currency-tabs">
+            @for (c of displayCurrencies; track c) {
+              <button
+                class="currency-tab"
+                [class.currency-tab--active]="currency.currentCurrency() === c"
+                (click)="setCurrency(c)"
+              >{{ c }}</button>
+            }
+          </div>
+        </div>
+
+        <div class="total-display">
+          <span class="total-display__amount">{{ totalDisplay() }}</span>
+          <span class="total-display__period">/ mes</span>
+        </div>
+
+        <div class="cost-breakdown">
+          <div class="cost-row">
+            <span class="cost-row__label">Coste base</span>
+            <span class="cost-row__value">{{ currency.format(baseCost()) }}</span>
+          </div>
+          <div class="cost-row">
+            <span class="cost-row__label">IVA ({{ taxRate() * 100 | number:'1.0-0' }}%)</span>
+            <span class="cost-row__value text-muted">{{ currency.format(taxAmount()) }}</span>
+          </div>
+          <div class="cost-divider"></div>
+          <div class="cost-row cost-row--total">
+            <span class="cost-row__label">Total mensual</span>
+            <span class="cost-row__value text-accent">{{ currency.format(totalEur()) }}</span>
+          </div>
+        </div>
+
+        @if (currency.currentCurrency() !== 'EUR') {
+          <p class="exchange-note">
+            Tipo de cambio aproximado. La factura se emite en EUR.
+          </p>
+        }
+
+        <div class="form-actions">
+          <a
+            class="btn-secondary"
+            [routerLink]="['/customers', customer()!.id]"
+          >Descartar</a>
+          <button
+            class="btn-primary"
+            [disabled]="saving()"
+            (click)="onSave()"
+          >
+            @if (saving()) { Guardando... } @else { Guardar simulación }
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}
