@@ -17,7 +17,10 @@ def create_customer(payload: CustomerCreate) -> CustomerOut:
         try:
             validate_spanish_fiscal_id(payload.fiscal_id)
         except ValueError as exc:
-            raise HTTPException(status_code=422, detail=str(exc))
+            raise HTTPException(
+                status_code=422,
+                detail={"detail": str(exc), "code": "FISCAL_ID_INVALID"},
+            )
 
     with get_conn() as conn:
         existing = conn.execute(
@@ -36,8 +39,13 @@ def create_customer(payload: CustomerCreate) -> CustomerOut:
             INSERT INTO customers (company, fiscal_id, email, country, plan)
             VALUES (?, ?, ?, ?, ?)
             """,
-            (payload.company, payload.fiscal_id, payload.email,
-             payload.country, payload.plan),
+            (
+                payload.company,
+                payload.fiscal_id,
+                payload.email,
+                payload.country,
+                payload.plan,
+            ),
         )
         row = conn.execute(
             "SELECT * FROM customers WHERE id = ?",

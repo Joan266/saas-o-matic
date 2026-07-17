@@ -6,7 +6,7 @@ Uses a temporary SQLite DB to avoid polluting the dev database.
 import pytest
 from fastapi.testclient import TestClient
 
-from app.database import init_db, DB_PATH
+from app.database import init_db
 import app.database as db_module
 
 
@@ -22,34 +22,42 @@ def temp_db(tmp_path, monkeypatch):
 @pytest.fixture
 def client(temp_db):
     from main import app
+
     return TestClient(app)
 
 
 @pytest.fixture
 def es_customer(client):
     """Create and return a valid Spanish customer."""
-    res = client.post("/customers", json={
-        "company": "Acme Corp SL",
-        "fiscal_id": "A28000727",
-        "email": "contact@acme.com",
-        "country": "ES",
-        "plan": "enterprise",
-    })
+    res = client.post(
+        "/customers",
+        json={
+            "company": "Acme Corp SL",
+            "fiscal_id": "A28000727",
+            "email": "contact@acme.com",
+            "country": "ES",
+            "plan": "enterprise",
+        },
+    )
     assert res.status_code == 201
     return res.json()
 
 
 # ── POST /customers ───────────────────────────────────────────────────────────
 
+
 class TestCreateCustomer:
     def test_happy_path_non_es(self, client):
-        res = client.post("/customers", json={
-            "company": "TechGmbH",
-            "fiscal_id": "DE123456",
-            "email": "info@techgmbh.de",
-            "country": "DE",
-            "plan": "professional",
-        })
+        res = client.post(
+            "/customers",
+            json={
+                "company": "TechGmbH",
+                "fiscal_id": "DE123456",
+                "email": "info@techgmbh.de",
+                "country": "DE",
+                "plan": "professional",
+            },
+        )
         assert res.status_code == 201
         data = res.json()
         assert data["company"] == "TechGmbH"
@@ -59,80 +67,104 @@ class TestCreateCustomer:
         assert "updated_at" in data
 
     def test_happy_path_es_valid_cif(self, client):
-        res = client.post("/customers", json={
-            "company": "Acme Corp SL",
-            "fiscal_id": "A28000727",
-            "email": "contact@acme.com",
-            "country": "ES",
-            "plan": "enterprise",
-        })
+        res = client.post(
+            "/customers",
+            json={
+                "company": "Acme Corp SL",
+                "fiscal_id": "A28000727",
+                "email": "contact@acme.com",
+                "country": "ES",
+                "plan": "enterprise",
+            },
+        )
         assert res.status_code == 201
 
     def test_es_invalid_fiscal_id_rejected(self, client):
-        res = client.post("/customers", json={
-            "company": "Fake Corp",
-            "fiscal_id": "B83584469",
-            "email": "fake@fake.com",
-            "country": "ES",
-            "plan": "starter",
-        })
+        res = client.post(
+            "/customers",
+            json={
+                "company": "Fake Corp",
+                "fiscal_id": "B83584469",
+                "email": "fake@fake.com",
+                "country": "ES",
+                "plan": "starter",
+            },
+        )
         assert res.status_code == 422
-        assert "inválido" in res.json()["detail"]
+        body = res.json()["detail"]
+        assert body["code"] == "FISCAL_ID_INVALID"
+        assert "inválido" in body["detail"]
 
     def test_invalid_fiscal_id_non_es_accepted(self, client):
         # Non-ES countries skip fiscal validation
-        res = client.post("/customers", json={
-            "company": "Startup Inc",
-            "fiscal_id": "ANYTHING-GOES",
-            "email": "hello@startup.com",
-            "country": "US",
-            "plan": "starter",
-        })
+        res = client.post(
+            "/customers",
+            json={
+                "company": "Startup Inc",
+                "fiscal_id": "ANYTHING-GOES",
+                "email": "hello@startup.com",
+                "country": "US",
+                "plan": "starter",
+            },
+        )
         assert res.status_code == 201
 
     def test_duplicate_fiscal_id_returns_409(self, client, es_customer):
-        res = client.post("/customers", json={
-            "company": "Other Corp",
-            "fiscal_id": "A28000727",  # same as es_customer
-            "email": "other@corp.com",
-            "country": "DE",
-            "plan": "starter",
-        })
+        res = client.post(
+            "/customers",
+            json={
+                "company": "Other Corp",
+                "fiscal_id": "A28000727",  # same as es_customer
+                "email": "other@corp.com",
+                "country": "DE",
+                "plan": "starter",
+            },
+        )
         assert res.status_code == 409
 
     def test_invalid_email_returns_422(self, client):
-        res = client.post("/customers", json={
-            "company": "Bad Corp",
-            "fiscal_id": "DE999",
-            "email": "not-an-email",
-            "country": "DE",
-            "plan": "starter",
-        })
+        res = client.post(
+            "/customers",
+            json={
+                "company": "Bad Corp",
+                "fiscal_id": "DE999",
+                "email": "not-an-email",
+                "country": "DE",
+                "plan": "starter",
+            },
+        )
         assert res.status_code == 422
 
     def test_invalid_plan_returns_422(self, client):
-        res = client.post("/customers", json={
-            "company": "Bad Corp",
-            "fiscal_id": "DE999",
-            "email": "ok@corp.com",
-            "country": "DE",
-            "plan": "gold",
-        })
+        res = client.post(
+            "/customers",
+            json={
+                "company": "Bad Corp",
+                "fiscal_id": "DE999",
+                "email": "ok@corp.com",
+                "country": "DE",
+                "plan": "gold",
+            },
+        )
         assert res.status_code == 422
 
     def test_extra_fields_rejected(self, client):
-        res = client.post("/customers", json={
-            "company": "Bad Corp",
-            "fiscal_id": "DE999",
-            "email": "ok@corp.com",
-            "country": "DE",
-            "plan": "starter",
-            "hacked": "value",
-        })
+        res = client.post(
+            "/customers",
+            json={
+                "company": "Bad Corp",
+                "fiscal_id": "DE999",
+                "email": "ok@corp.com",
+                "country": "DE",
+                "plan": "starter",
+                "hacked": "value",
+            },
+        )
         assert res.status_code == 422
 
 
 # ── GET /customers ────────────────────────────────────────────────────────────
+
 
 class TestListCustomers:
     def test_empty_list(self, client):
@@ -163,6 +195,7 @@ class TestListCustomers:
 
 # ── GET /customers/:id ────────────────────────────────────────────────────────
 
+
 class TestGetCustomer:
     def test_happy_path(self, client, es_customer):
         res = client.get(f"/customers/{es_customer['id']}")
@@ -176,14 +209,18 @@ class TestGetCustomer:
 
 # ── POST /simulations ─────────────────────────────────────────────────────────
 
+
 class TestCreateSimulation:
     def test_happy_path_es_21_vat(self, client, es_customer):
-        res = client.post("/simulations", json={
-            "customer_id": es_customer["id"],
-            "active_users": 15,
-            "storage_gb": 100,
-            "api_calls": 50000,
-        })
+        res = client.post(
+            "/simulations",
+            json={
+                "customer_id": es_customer["id"],
+                "active_users": 15,
+                "storage_gb": 100,
+                "api_calls": 50000,
+            },
+        )
         assert res.status_code == 201
         data = res.json()
         assert data["base_cost"] == 140.00
@@ -191,34 +228,44 @@ class TestCreateSimulation:
         assert data["total_cost"] == 169.40
 
     def test_customer_not_found_returns_404(self, client):
-        res = client.post("/simulations", json={
-            "customer_id": 9999,
-            "active_users": 10,
-            "storage_gb": 50,
-            "api_calls": 1000,
-        })
+        res = client.post(
+            "/simulations",
+            json={
+                "customer_id": 9999,
+                "active_users": 10,
+                "storage_gb": 50,
+                "api_calls": 1000,
+            },
+        )
         assert res.status_code == 404
 
     def test_zero_users_returns_422(self, client, es_customer):
-        res = client.post("/simulations", json={
-            "customer_id": es_customer["id"],
-            "active_users": 0,
-            "storage_gb": 50,
-            "api_calls": 1000,
-        })
+        res = client.post(
+            "/simulations",
+            json={
+                "customer_id": es_customer["id"],
+                "active_users": 0,
+                "storage_gb": 50,
+                "api_calls": 1000,
+            },
+        )
         assert res.status_code == 422
 
     def test_negative_storage_returns_422(self, client, es_customer):
-        res = client.post("/simulations", json={
-            "customer_id": es_customer["id"],
-            "active_users": 10,
-            "storage_gb": -1,
-            "api_calls": 1000,
-        })
+        res = client.post(
+            "/simulations",
+            json={
+                "customer_id": es_customer["id"],
+                "active_users": 10,
+                "storage_gb": -1,
+                "api_calls": 1000,
+            },
+        )
         assert res.status_code == 422
 
 
 # ── GET /simulations/customer/:id ─────────────────────────────────────────────
+
 
 class TestGetCustomerSimulations:
     def test_empty_history(self, client, es_customer):
@@ -228,14 +275,24 @@ class TestGetCustomerSimulations:
 
     def test_returns_simulations_ordered_desc(self, client, es_customer):
         cid = es_customer["id"]
-        client.post("/simulations", json={
-            "customer_id": cid, "active_users": 10,
-            "storage_gb": 50, "api_calls": 1000,
-        })
-        client.post("/simulations", json={
-            "customer_id": cid, "active_users": 50,
-            "storage_gb": 200, "api_calls": 5000,
-        })
+        client.post(
+            "/simulations",
+            json={
+                "customer_id": cid,
+                "active_users": 10,
+                "storage_gb": 50,
+                "api_calls": 1000,
+            },
+        )
+        client.post(
+            "/simulations",
+            json={
+                "customer_id": cid,
+                "active_users": 50,
+                "storage_gb": 200,
+                "api_calls": 5000,
+            },
+        )
         res = client.get(f"/simulations/customer/{cid}")
         assert res.status_code == 200
         sims = res.json()
