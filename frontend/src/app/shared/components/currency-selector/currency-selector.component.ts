@@ -36,23 +36,26 @@ import { CURRENCIES, Currency } from '../../../core/models/types';
       display: flex;
       align-items: center;
       gap: 6px;
-      background: var(--surface-raised);
-      border: 1px solid var(--border);
+      background: var(--accent-dim);
+      border: 1px solid rgba(242, 163, 60, 0.4);
       border-radius: 8px;
-      color: var(--text-primary);
+      color: var(--accent);
       font-family: 'Space Grotesk', sans-serif;
       font-size: 0.8125rem;
-      font-weight: 500;
-      padding: 6px 10px;
+      font-weight: 700;
+      padding: 6px 12px;
       cursor: pointer;
       white-space: nowrap;
-      transition: border-color 0.15s;
+      transition: background 0.15s, border-color 0.15s;
     }
 
     .cs-trigger:hover,
-    .cs-trigger--open { border-color: var(--accent); }
+    .cs-trigger--open {
+      background: rgba(242, 163, 60, 0.2);
+      border-color: var(--accent);
+    }
 
-    .cs-trigger svg { opacity: 0.6; transition: transform 0.15s; }
+    .cs-trigger svg { transition: transform 0.15s; }
     .cs-trigger--open svg { transform: rotate(180deg); }
 
     .cs-dropdown {
