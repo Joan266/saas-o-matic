@@ -149,3 +149,170 @@ Screenshots tomados con Playwright tras completar todos los componentes:
 
 Los cálculos del simulador se verificaron manualmente:
 - 65 usuarios: 10×10 + 40×8 + 15×5 = 100 + 320 + 75 = 495€ base + 21% = 598.95€ ✓
+
+---
+
+## Sesión 2 — Revisión visual en vivo + correcciones
+
+### Contexto
+Se revisó la app funcionando contra el documento original (`Prueba Devs con IA.docx`).
+Se identificaron bugs reales, decisiones a corregir y mejoras de criterio técnico.
+
+---
+
+### Análisis de cada punto revisado
+
+#### 1. Tabs locales de divisa — ELIMINADAS
+
+**Problema:** `CustomerDetailComponent` y `SimulationFormComponent` tenían tabs
+`['EUR','USD','GBP']` hardcodeadas que duplicaban el selector del navbar (7 divisas).
+Si el usuario seleccionaba MXN en el navbar y navegaba al detalle, ninguna tab
+quedaba activa — estado visual roto.
+
+**Decisión:** Eliminar las tabs locales. El selector del navbar es el único punto
+de control de divisa. Todos los componentes consumen `CurrencyService.currentCurrency()`
+via Signal — el cambio propaga automáticamente.
+
+**Eliminado:** `DISPLAY_CURRENCIES`, `displayCurrencies`, `setCurrency()`, import
+`Currency` en ambos componentes. CSS muerto de `.currency-tabs` y `.currency-tab`.
+
+---
+
+#### 2. Stats del dashboard — CORREGIDOS
+
+**Problema:** "Simulaciones guardadas" y "MRR simulado" mostraban `—`.
+Dead code: `customers().reduce((acc, _) => acc + 0, 0)`.
+
+**Decisión:** Añadir `GET /stats` en backend + llamar `getStats()` en `ngOnInit`.
+El dashboard ahora muestra datos reales desde el primer render.
+
+---
+
+#### 3. Columna "Últ. Simulación" — CORREGIDA
+
+**Problema:** Hardcodeada: `<span class="last-sim text-muted">—</span>`.
+
+**Decisión:** Backend añade `last_simulation_at` via LEFT JOIN.
+Frontend mapea el campo en `api.service.ts` y formatea con `toLocaleString('es-ES')`.
+
+---
+
+#### 4. Sliders de almacenamiento y llamadas API — ELIMINADOS
+
+**Problema detectado al revisar el documento original:**
+
+El documento pide en la Vista 3: *"Un slider o controles dinámicos para ajustar
+**la cantidad de usuarios**"* — singular. Los sliders de storage y API calls no
+estaban pedidos en la UI.
+
+El spec derivado (`01-product-spec.md`) los añadió por extrapolar que si el
+backend los recoge, el frontend debería configurarlos. Error de interpretación.
+
+**Decisión:** Eliminar sliders de storage y API calls del formulario.
+El backend sigue recibiendo `storage_gb: 1, api_calls: 0` como valores por defecto
+— el contrato de la API no cambia.
+
+**Justificación:** Tres sliders donde solo uno afecta al precio es confuso para el
+equipo comercial. La UX correcta muestra solo los controles que tienen impacto real.
+
+---
+
+#### 5. Plan badge — MOVIDO al info grid
+
+**Problema:** El badge de plan estaba en el header junto al nombre de empresa.
+El info grid (ID Fiscal, Email, País, Últ. simulación) es donde deben estar
+todos los metadatos del cliente.
+
+**Decisión:** Mover badge al info grid como quinta celda.
+Header queda más limpio. Grid usa `auto-fill minmax(180px, 1fr)` para 5 celdas.
+
+---
+
+#### 6. Input numérico para usuarios — AÑADIDO
+
+**Motivación:** El slider topa en 200 usuarios. Un comercial simulando 500 o 1000
+usuarios no puede usarlo. El documento no especifica límite superior.
+
+**Decisión:** Slider (1–200) + input numérico sincronizados:
+- Slider: ajuste rápido/visual con marcadores de tramo en 10 y 50
+- Input: cualquier valor `>= 1` sin límite superior
+- Sync: `sliderValue = computed(() => Math.min(activeUsers(), 200))`
+- El cálculo usa siempre el valor real del signal, no el del slider
+
+---
+
+#### 7. Buscador — CAMBIADO a filtro local
+
+**Problema:** El buscador hacía `GET /customers?q=` en cada búsqueda (con 300ms debounce).
+Para una herramienta interna con decenas de clientes es innecesario.
+
+**Decisión:** Cargar todos los clientes una vez en `ngOnInit`. Filtrar localmente:
+```typescript
+filteredCustomers = computed(() => {
+  const q = this.searchQuery().toLowerCase().trim();
+  if (!q) return this.customers();
+  return this.customers().filter(c =>
+    c.company.toLowerCase().includes(q) ||
+    c.fiscalId.toLowerCase().includes(q)
+  );
+});
+```
+
+**Eliminado:** `Subject`, `debounceTime`, `distinctUntilChanged`, `switchMap`, `startWith`.
+**Resultado:** Filtrado instantáneo, sin loading states, sin llamadas HTTP.
+
+---
+
+#### 8. Timeout y retry en API de tipos de cambio — AÑADIDOS
+
+**Motivación:** El documento evalúa explícitamente *"manejo de estados de carga/error
+al consumir la API externa"*. Si la API cuelga indefinidamente, la app queda bloqueada.
+
+**Implementación:**
+```typescript
+.pipe(timeout(5000), retry(2))
+```
+
+Flujo: petición → si > 5s → timeout → reintento (hasta 2 veces) →
+si falla → "⚠ EUR (sin conexión)" en navbar, app opera en EUR.
+
+---
+
+#### 9. Selector de divisa — MÁS VISIBLE en navbar
+
+**Problema:** El botón era gris neutro (`--surface-raised`) — prácticamente invisible.
+El navbar es el único punto de control de divisa. Debe ser identificable.
+
+**Cambio:** Fondo `--accent-dim` (tinte amber 12%), borde amber 40%, texto amber
+`font-weight: 700`. Hover: tinte más fuerte + borde completo.
+
+---
+
+#### 10. Fecha y hora en historial de simulaciones — AÑADIDAS
+
+**Motivación:** Si un comercial hace varias simulaciones el mismo día, la fecha sola
+no diferencia cuál es cuál. La hora añade contexto real sin coste de complejidad.
+
+**Cambio:** `toLocaleDateString` → `toLocaleString` con `hour: '2-digit', minute: '2-digit'`.
+
+---
+
+### Decisiones conscientes de NO implementar
+
+| Feature | Motivo |
+|---|---|
+| Edit/Delete clientes y simulaciones | No pedido en el documento |
+| Caching de rutas (RouteReuseStrategy) | Over-engineering para este scope |
+| State transfer entre rutas | Acoplamiento innecesario |
+| Validación fiscal para países distintos de ES | Spec solo pide validación española |
+| Tabla compartida como componente reutilizable | Dashboard y detalle tienen datos distintos; una sola instancia no justifica abstracción |
+| Filtros en tabla de simulaciones | No pedido; volumen bajo en demo |
+
+---
+
+### Verificación final sesión 2
+
+```
+pytest -v → 94/94 tests ✅
+ng build --configuration development → sin errores ✅
+```

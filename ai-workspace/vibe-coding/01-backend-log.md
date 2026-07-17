@@ -191,3 +191,57 @@ backend/
 │   └── test_schemas.py      # Validación Pydantic
 └── main.py                  # App, CORS, logging, seed data
 ```
+
+---
+
+## Sesión 2 — Revisión post-QA visual + nuevos endpoints
+
+### Contexto
+Revisión de la app en vivo. Se identificaron varios bugs e inconsistencias
+comparando el comportamiento real contra el documento original.
+
+### Cambios backend aplicados
+
+#### 1. GET /stats — AÑADIDO
+
+**Decisión:** El dashboard mostraba `—` en "Simulaciones guardadas" y "MRR simulado"
+porque no existía endpoint para obtener esos aggregados. Se añadió `GET /stats`.
+
+**Implementación:** `app/routes/stats.py`
+```python
+GET /stats → { total_customers, total_simulations, total_mrr }
+```
+
+MRR calculado como suma de la simulación más reciente por cliente (no suma de todas):
+```sql
+SELECT COALESCE(SUM(s.total_cost), 0)
+FROM simulations s
+INNER JOIN (
+    SELECT customer_id, MAX(id) AS max_id FROM simulations GROUP BY customer_id
+) latest ON s.id = latest.max_id
+```
+
+**Decisión de diseño:** MRR = última simulación por cliente, no la suma de todas.
+Un cliente con 10 simulaciones históricas no contribuye 10× al MRR.
+
+#### 2. last_simulation_at en GET /customers — AÑADIDO
+
+**Problema:** La columna "Últ. Simulación" del dashboard siempre mostraba `—`.
+`GET /customers` no devolvía datos de simulaciones.
+
+**Solución:** LEFT JOIN en la query de listado, sin N+1:
+```sql
+SELECT c.*, MAX(s.created_at) AS last_simulation_at
+FROM customers c
+LEFT JOIN simulations s ON s.customer_id = c.id
+GROUP BY c.id
+ORDER BY c.created_at DESC, c.id DESC
+```
+
+`CustomerOut` añade `last_simulation_at: str | None = None`.
+
+### Verificación final sesión 2
+
+```
+pytest -v → 94/94 tests ✅  (+5 tests para /stats y last_simulation_at)
+```
