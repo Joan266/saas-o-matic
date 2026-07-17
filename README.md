@@ -7,10 +7,9 @@ Herramienta interna para que el equipo comercial simule, optimice y presupueste 
 | Capa | Tecnología |
 |---|---|
 | Backend | Python 3.12 · FastAPI · SQLite (sin ORM) |
-| Frontend | Angular 17+ · Standalone components · Signals |
-| Tests backend | pytest (89 tests) |
-| Tests frontend | Vitest |
-| QA visual | Playwright |
+| Frontend | Angular 21 · Standalone components · Signals |
+| Tests backend | pytest (94 tests) |
+| Tests frontend | Vitest (22 tests) |
 
 ---
 
@@ -25,6 +24,13 @@ Herramienta interna para que el equipo comercial simule, optimice y presupueste 
 
 ```bash
 cd backend
+python -m venv venv
+
+# Mac / Linux
+source venv/bin/activate
+# Windows
+venv\Scripts\activate
+
 pip install -r requirements.txt
 python -m uvicorn main:app --reload --port 8000
 ```
@@ -40,7 +46,7 @@ con datos de prueba (5 clientes y varias simulaciones).
 ```bash
 cd frontend
 npm install
-ng serve
+npm start
 ```
 
 La app queda disponible en `http://localhost:4200`.
@@ -76,11 +82,13 @@ Cubre: `billing.utils.ts` (cálculo de tramos) y `fiscal-validator.utils.ts` (va
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `GET` | `/customers` | Listar clientes (búsqueda por `?q=`) |
+| `GET` | `/customers` | Listar clientes |
 | `POST` | `/customers` | Crear cliente (valida DNI/NIE/CIF si país=ES) |
 | `GET` | `/customers/:id` | Detalle de cliente |
 | `GET` | `/simulations/customer/:id` | Historial de simulaciones |
 | `POST` | `/simulations` | Crear simulación (calcula coste por tramos + IVA) |
+| `GET` | `/stats` | KPIs globales: clientes, simulaciones, MRR |
+| `GET` | `/health` | Health check |
 
 ---
 
@@ -107,9 +115,9 @@ saas-o-matic/
 ├── backend/               # API REST FastAPI
 │   ├── app/
 │   │   ├── models/        # Pydantic schemas
-│   │   ├── routes/        # Endpoints (customers, simulations)
+│   │   ├── routes/        # Endpoints (customers, simulations, stats)
 │   │   └── services/      # Lógica de negocio (billing, fiscal_validator)
-│   ├── tests/             # 89 tests pytest
+│   ├── tests/             # 94 tests pytest
 │   └── main.py
 ├── frontend/              # Angular 17 standalone
 │   └── src/app/
