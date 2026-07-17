@@ -1,12 +1,11 @@
-import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, startWith } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { CurrencyService } from '../../../core/services/currency.service';
-import { Customer } from '../../../core/models/types';
-import { COUNTRY_LABELS } from '../../../core/models/types';
+import { Customer, Stats, COUNTRY_LABELS } from '../../../core/models/types';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,14 +20,11 @@ export class DashboardComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly customers = signal<Customer[]>([]);
+  protected readonly stats = signal<Stats | null>(null);
   protected readonly loading = signal(true);
   protected readonly searchQuery = signal('');
 
   private readonly search$ = new Subject<string>();
-
-  protected readonly totalSimulations = computed(() =>
-    this.customers().reduce((acc, _) => acc + 0, 0),
-  );
 
   protected readonly countryLabel = (code: string) =>
     COUNTRY_LABELS[code] ?? code;
@@ -53,6 +49,10 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.api.getStats()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: s => this.stats.set(s) });
+
     this.search$
       .pipe(
         startWith(''),
@@ -78,7 +78,10 @@ export class DashboardComponent implements OnInit {
     this.search$.next(value);
   }
 
-  get mrr(): number {
-    return this.customers().reduce((acc, c) => acc + 0, 0);
+  protected formatLastSim(iso: string | undefined): string {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('es-ES', {
+      day: '2-digit', month: 'short', year: 'numeric',
+    });
   }
 }

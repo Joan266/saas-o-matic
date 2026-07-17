@@ -41,7 +41,6 @@
       </div>
       <div class="header-card__info">
         <h1 class="header-card__company">{{ customer()!.company }}</h1>
-        <span [class]="'plan-badge plan-badge--' + customer()!.plan">{{ customer()!.plan }}</span>
       </div>
       <a class="btn-primary" [routerLink]="['/customers', customer()!.id, 'simulate']">
         + Nueva simulación
@@ -69,22 +68,16 @@
         <span class="info-cell__label">Última factura simulada</span>
         <span class="info-cell__value">{{ lastSim() }}</span>
       </div>
+      <div class="info-cell card">
+        <span class="info-cell__label">Plan</span>
+        <span [class]="'plan-badge plan-badge--' + customer()!.plan">{{ customer()!.plan }}</span>
+      </div>
     </div>
 
     <!-- Simulation history -->
     <div class="sim-section card">
       <div class="sim-section__header">
         <h2 class="sim-section__title">Historial de simulaciones</h2>
-        <div class="currency-tabs">
-          @for (c of displayCurrencies; track c) {
-            <button
-              type="button"
-              class="currency-tab"
-              [class.currency-tab--active]="currency.currentCurrency() === c"
-              (click)="setCurrency(c)"
-            >{{ c }}</button>
-          }
-        </div>
       </div>
 
       @if (simulations().length === 0) {

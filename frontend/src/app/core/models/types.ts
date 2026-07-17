@@ -30,6 +30,13 @@ export interface Customer {
   plan: Plan;
   createdAt: string;
   updatedAt: string;
+  lastSimulationAt?: string;
+}
+
+export interface Stats {
+  totalCustomers: number;
+  totalSimulations: number;
+  totalMrr: number;
 }
 
 export interface CustomerCreate {

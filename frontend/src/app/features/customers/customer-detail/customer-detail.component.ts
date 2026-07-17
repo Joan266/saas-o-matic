@@ -6,10 +6,7 @@ import { forkJoin } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { CurrencyService } from '../../../core/services/currency.service';
 import { Customer, Simulation, COUNTRY_LABELS, TAX_RATES } from '../../../core/models/types';
-import { Currency } from '../../../core/services/currency.service';
 import { getTierBreakdown, TierBreakdown } from '../../../shared/utils/billing.utils';
-
-const DISPLAY_CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP'];
 
 @Component({
   selector: 'app-customer-detail',
@@ -29,8 +26,6 @@ export class CustomerDetailComponent implements OnInit {
   protected readonly simulations = signal<Simulation[]>([]);
   protected readonly loading = signal(true);
   protected readonly expandedSimId = signal<number | null>(null);
-
-  protected readonly displayCurrencies = DISPLAY_CURRENCIES;
 
   protected readonly lastSim = computed(() => {
     const sims = this.simulations();
@@ -59,10 +54,6 @@ export class CustomerDetailComponent implements OnInit {
           this.router.navigate(['/']);
         },
       });
-  }
-
-  protected setCurrency(c: Currency): void {
-    this.currency.setCurrency(c);
   }
 
   protected toggleExpand(simId: number): void {

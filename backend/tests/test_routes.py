@@ -303,3 +303,80 @@ class TestGetCustomerSimulations:
     def test_customer_not_found_returns_404(self, client):
         res = client.get("/simulations/customer/9999")
         assert res.status_code == 404
+
+
+# ── GET /stats ────────────────────────────────────────────────────────────────
+
+
+class TestGetStats:
+    def test_empty_db(self, client):
+        res = client.get("/stats")
+        assert res.status_code == 200
+        data = res.json()
+        assert data["total_customers"] == 0
+        assert data["total_simulations"] == 0
+        assert data["total_mrr"] == 0.0
+
+    def test_counts_customers_and_simulations(self, client, es_customer):
+        client.post(
+            "/simulations",
+            json={
+                "customer_id": es_customer["id"],
+                "active_users": 15,
+                "storage_gb": 100,
+                "api_calls": 50000,
+            },
+        )
+        res = client.get("/stats")
+        assert res.status_code == 200
+        data = res.json()
+        assert data["total_customers"] == 1
+        assert data["total_simulations"] == 1
+        assert data["total_mrr"] == pytest.approx(169.40, rel=1e-3)
+
+    def test_mrr_uses_latest_simulation_per_customer(self, client, es_customer):
+        # Two simulations for same customer — MRR should use only the latest
+        client.post(
+            "/simulations",
+            json={
+                "customer_id": es_customer["id"],
+                "active_users": 10,
+                "storage_gb": 50,
+                "api_calls": 0,
+            },
+        )
+        client.post(
+            "/simulations",
+            json={
+                "customer_id": es_customer["id"],
+                "active_users": 50,
+                "storage_gb": 200,
+                "api_calls": 0,
+            },
+        )
+        res = client.get("/stats")
+        data = res.json()
+        assert data["total_simulations"] == 2
+        # latest sim: 50 users = (10×10)+(40×8) = 420 base, ×1.21 = 508.20
+        assert data["total_mrr"] == pytest.approx(508.20, rel=1e-3)
+
+    def test_last_simulation_at_in_list(self, client, es_customer):
+        # Verify last_simulation_at is returned in GET /customers
+        client.post(
+            "/simulations",
+            json={
+                "customer_id": es_customer["id"],
+                "active_users": 10,
+                "storage_gb": 50,
+                "api_calls": 0,
+            },
+        )
+        res = client.get("/customers")
+        assert res.status_code == 200
+        customer = res.json()[0]
+        assert customer["last_simulation_at"] is not None
+
+    def test_last_simulation_at_null_when_no_sims(self, client, es_customer):
+        res = client.get("/customers")
+        customer = res.json()[0]
+        assert customer["last_simulation_at"] is None

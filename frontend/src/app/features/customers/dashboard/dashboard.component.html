@@ -38,18 +38,18 @@
     </div>
     <div class="stat-card">
       <span class="stat-card__label">Simulaciones guardadas</span>
-      @if (loading()) {
+      @if (loading() || stats() === null) {
         <div class="skeleton" style="height:2rem;width:60px;margin-top:.5rem"></div>
       } @else {
-        <span class="stat-card__value">—</span>
+        <span class="stat-card__value">{{ stats()!.totalSimulations }}</span>
       }
     </div>
     <div class="stat-card stat-card--accent">
       <span class="stat-card__label">MRR simulado ({{ currency.currentCurrency() }})</span>
-      @if (loading()) {
+      @if (loading() || stats() === null) {
         <div class="skeleton" style="height:2rem;width:120px;margin-top:.5rem"></div>
       } @else {
-        <span class="stat-card__value stat-card__value--accent">—</span>
+        <span class="stat-card__value stat-card__value--accent">{{ currency.format(stats()!.totalMrr) }}</span>
       }
     </div>
   </div>
@@ -115,7 +115,7 @@
           <span class="fiscal-id">{{ c.fiscalId }}</span>
           <span class="country">{{ countryLabel(c.country) }}</span>
           <span [class]="'plan-badge plan-badge--' + c.plan">{{ c.plan }}</span>
-          <span class="last-sim text-muted">—</span>
+          <span class="last-sim text-muted">{{ formatLastSim(c.lastSimulationAt) }}</span>
           <a class="ver-link" [routerLink]="['/customers', c.id]" (click)="$event.stopPropagation()">
             Ver →
           </a>

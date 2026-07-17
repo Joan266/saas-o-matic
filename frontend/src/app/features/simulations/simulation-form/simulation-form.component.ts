@@ -5,10 +5,7 @@ import { DecimalPipe } from '@angular/common';
 import { ApiService } from '../../../core/services/api.service';
 import { CurrencyService } from '../../../core/services/currency.service';
 import { Customer, TAX_RATES } from '../../../core/models/types';
-import { Currency } from '../../../core/services/currency.service';
 import { calcBaseCost, getTierBreakdown, TierBreakdown } from '../../../shared/utils/billing.utils';
-
-const DISPLAY_CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP'];
 
 @Component({
   selector: 'app-simulation-form',
@@ -31,8 +28,6 @@ export class SimulationFormComponent implements OnInit {
   protected readonly activeUsers = signal(15);
   protected readonly storageGb = signal(100);
   protected readonly apiCallsK = signal(50);
-
-  protected readonly displayCurrencies = DISPLAY_CURRENCIES;
 
   // Computed billing values
   protected readonly baseCost = computed(() => calcBaseCost(this.activeUsers()));
@@ -74,10 +69,6 @@ export class SimulationFormComponent implements OnInit {
 
   protected onApiCallsChange(event: Event): void {
     this.apiCallsK.set(Number((event.target as HTMLInputElement).value));
-  }
-
-  protected setCurrency(c: Currency): void {
-    this.currency.setCurrency(c);
   }
 
   protected onSave(): void {

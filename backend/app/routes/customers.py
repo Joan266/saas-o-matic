@@ -62,15 +62,24 @@ def list_customers(q: str | None = None) -> list[CustomerOut]:
         if q:
             rows = conn.execute(
                 """
-                SELECT * FROM customers
-                WHERE company LIKE ? OR fiscal_id LIKE ?
-                ORDER BY created_at DESC, id DESC
+                SELECT c.*, MAX(s.created_at) AS last_simulation_at
+                FROM customers c
+                LEFT JOIN simulations s ON s.customer_id = c.id
+                WHERE c.company LIKE ? OR c.fiscal_id LIKE ?
+                GROUP BY c.id
+                ORDER BY c.created_at DESC, c.id DESC
                 """,
                 (f"%{q}%", f"%{q}%"),
             ).fetchall()
         else:
             rows = conn.execute(
-                "SELECT * FROM customers ORDER BY created_at DESC"
+                """
+                SELECT c.*, MAX(s.created_at) AS last_simulation_at
+                FROM customers c
+                LEFT JOIN simulations s ON s.customer_id = c.id
+                GROUP BY c.id
+                ORDER BY c.created_at DESC, c.id DESC
+                """
             ).fetchall()
 
     return [CustomerOut(**dict(r)) for r in rows]

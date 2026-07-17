@@ -114,19 +114,7 @@
 
       <!-- RIGHT: Projection -->
       <div class="panel panel--right card">
-        <div class="projection-header">
-          <h2 class="panel__title">Proyección mensual</h2>
-          <div class="currency-tabs">
-            @for (c of displayCurrencies; track c) {
-              <button
-                type="button"
-                class="currency-tab"
-                [class.currency-tab--active]="currency.currentCurrency() === c"
-                (click)="setCurrency(c)"
-              >{{ c }}</button>
-            }
-          </div>
-        </div>
+        <h2 class="panel__title">Proyección mensual</h2>
 
         <div class="total-display">
           <span class="total-display__amount">{{ totalDisplay() }}</span>

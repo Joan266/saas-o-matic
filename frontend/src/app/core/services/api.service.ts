@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Customer, CustomerCreate, Simulation, SimulationCreate } from '../models/types';
+import { Customer, CustomerCreate, Simulation, SimulationCreate, Stats } from '../models/types';
 
 interface CustomerRaw {
   id: number;
@@ -13,6 +13,13 @@ interface CustomerRaw {
   plan: string;
   created_at: string;
   updated_at: string;
+  last_simulation_at?: string;
+}
+
+interface StatsRaw {
+  total_customers: number;
+  total_simulations: number;
+  total_mrr: number;
 }
 
 interface SimulationRaw {
@@ -42,6 +49,7 @@ export class ApiService {
       plan: raw.plan as Customer['plan'],
       createdAt: raw.created_at,
       updatedAt: raw.updated_at,
+      lastSimulationAt: raw.last_simulation_at,
     };
   }
 
@@ -90,6 +98,16 @@ export class ApiService {
     return this.http
       .get<SimulationRaw[]>(`${this.base}/simulations/customer/${customerId}`)
       .pipe(map(rows => rows.map(r => this.toSimulation(r))));
+  }
+
+  getStats(): Observable<Stats> {
+    return this.http
+      .get<StatsRaw>(`${this.base}/stats`)
+      .pipe(map(r => ({
+        totalCustomers: r.total_customers,
+        totalSimulations: r.total_simulations,
+        totalMrr: r.total_mrr,
+      })));
   }
 
   createSimulation(payload: SimulationCreate): Observable<Simulation> {

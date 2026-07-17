@@ -14,6 +14,7 @@ COUNTRY_TAX: dict[str, float] = {
 
 # ── Customer ──────────────────────────────────────────────────────────────────
 
+
 class CustomerCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -62,9 +63,11 @@ class CustomerOut(BaseModel):
     plan: str
     created_at: str
     updated_at: str
+    last_simulation_at: str | None = None
 
 
 # ── Simulation ────────────────────────────────────────────────────────────────
+
 
 class SimulationCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
