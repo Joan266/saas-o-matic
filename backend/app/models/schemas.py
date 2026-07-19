@@ -2,17 +2,9 @@ from pydantic import BaseModel, EmailStr, field_validator, model_validator, Conf
 
 VALID_PLANS = {"starter", "professional", "enterprise"}
 
-COUNTRY_TAX: dict[str, float] = {
-    "ES": 0.21,
-    "DE": 0.19,
-    "FR": 0.20,
-    "UK": 0.20,
-    "MX": 0.16,
-    "US": 0.00,
-}
-
 
 # ── Customer ──────────────────────────────────────────────────────────────────
+
 
 class CustomerCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -62,9 +54,11 @@ class CustomerOut(BaseModel):
     plan: str
     created_at: str
     updated_at: str
+    last_simulation_at: str | None = None
 
 
 # ── Simulation ────────────────────────────────────────────────────────────────
+
 
 class SimulationCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -98,3 +92,12 @@ class SimulationOut(BaseModel):
     tax_rate: float
     total_cost: float
     created_at: str
+
+
+# ── Stats ─────────────────────────────────────────────────────────────────────
+
+
+class StatsOut(BaseModel):
+    total_customers: int
+    total_simulations: int
+    total_mrr: float

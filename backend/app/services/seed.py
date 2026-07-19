@@ -19,12 +19,12 @@ _CUSTOMERS = [
 
 _SIMULATIONS = [
     # (company fiscal_id, active_users, storage_gb, api_calls)
-    ("A28000727", 5,   50,   10_000),
-    ("A28000727", 15,  100,  50_000),
-    ("A28000727", 50,  500,  200_000),
-    ("A28000727", 75,  1000, 1_000_000),
-    ("DE123456",  20,  200,  75_000),
-    ("US-TAX-001", 8,  30,   5_000),
+    ("A28000727", 5, 50, 10_000),
+    ("A28000727", 15, 100, 50_000),
+    ("A28000727", 50, 500, 200_000),
+    ("A28000727", 75, 1000, 1_000_000),
+    ("DE123456", 20, 200, 75_000),
+    ("US-TAX-001", 8, 30, 5_000),
 ]
 
 
@@ -58,6 +58,9 @@ def _seed_simulations() -> None:
             ).fetchone()
 
             if not customer:
+                logger.warning(
+                    "Seed: customer with fiscal_id=%s not found, skipping", fiscal_id
+                )
                 continue
 
             base_cost = calculate_base_cost(users)
@@ -71,8 +74,15 @@ def _seed_simulations() -> None:
                      base_cost, tax_rate, total_cost)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
-                (customer["id"], users, storage, api_calls,
-                 base_cost, tax_rate, total_cost),
+                (
+                    customer["id"],
+                    users,
+                    storage,
+                    api_calls,
+                    base_cost,
+                    tax_rate,
+                    total_cost,
+                ),
             )
 
     logger.info("Seed: %d demo simulations inserted", len(_SIMULATIONS))

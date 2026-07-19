@@ -1,9 +1,10 @@
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 
-from app.database import get_conn
 from app.models.schemas import CustomerCreate, CustomerOut
+from app.services import customers as customers_svc
 from app.services.fiscal_validator import validate_spanish_fiscal_id
 
 logger = logging.getLogger(__name__)
@@ -12,71 +13,41 @@ router = APIRouter(prefix="/customers", tags=["customers"])
 
 
 @router.post("", response_model=CustomerOut, status_code=201)
-def create_customer(payload: CustomerCreate) -> CustomerOut:
+def create_customer(payload: CustomerCreate):
     if payload.country == "ES":
         try:
             validate_spanish_fiscal_id(payload.fiscal_id)
         except ValueError as exc:
-            raise HTTPException(status_code=422, detail=str(exc))
-
-    with get_conn() as conn:
-        existing = conn.execute(
-            "SELECT id FROM customers WHERE fiscal_id = ?",
-            (payload.fiscal_id,),
-        ).fetchone()
-
-        if existing:
-            raise HTTPException(
-                status_code=409,
-                detail="Este identificador fiscal ya está registrado.",
+            return JSONResponse(
+                status_code=422,
+                content={"detail": str(exc), "code": "FISCAL_ID_INVALID"},
             )
 
-        cursor = conn.execute(
-            """
-            INSERT INTO customers (company, fiscal_id, email, country, plan)
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            (payload.company, payload.fiscal_id, payload.email,
-             payload.country, payload.plan),
+    if customers_svc.fiscal_id_exists(payload.fiscal_id):
+        return JSONResponse(
+            status_code=409,
+            content={
+                "detail": "Este identificador fiscal ya está registrado.",
+                "code": "DUPLICATE_FISCAL_ID",
+            },
         )
-        row = conn.execute(
-            "SELECT * FROM customers WHERE id = ?",
-            (cursor.lastrowid,),
-        ).fetchone()
 
-    logger.info("Customer created: id=%s company='%s'", row["id"], row["company"])
-    return CustomerOut(**dict(row))
+    customer = customers_svc.create_customer(payload)
+    logger.info("Customer created: id=%s company='%s'", customer.id, customer.company)
+    return customer
 
 
 @router.get("", response_model=list[CustomerOut])
 def list_customers(q: str | None = None) -> list[CustomerOut]:
-    with get_conn() as conn:
-        if q:
-            rows = conn.execute(
-                """
-                SELECT * FROM customers
-                WHERE company LIKE ? OR fiscal_id LIKE ?
-                ORDER BY created_at DESC, id DESC
-                """,
-                (f"%{q}%", f"%{q}%"),
-            ).fetchall()
-        else:
-            rows = conn.execute(
-                "SELECT * FROM customers ORDER BY created_at DESC"
-            ).fetchall()
-
-    return [CustomerOut(**dict(r)) for r in rows]
+    return customers_svc.list_customers(q)
 
 
 @router.get("/{customer_id}", response_model=CustomerOut)
-def get_customer(customer_id: int) -> CustomerOut:
-    with get_conn() as conn:
-        row = conn.execute(
-            "SELECT * FROM customers WHERE id = ?",
-            (customer_id,),
-        ).fetchone()
-
-    if not row:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado.")
-
-    return CustomerOut(**dict(row))
+def get_customer(customer_id: int):
+    customer = customers_svc.get_customer_by_id(customer_id)
+    if not customer:
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "Cliente no encontrado.", "code": "CUSTOMER_NOT_FOUND"},
+        )
+    return customer

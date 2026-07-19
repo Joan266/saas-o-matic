@@ -13,6 +13,7 @@ from app.database import init_db
 from app.services.seed import seed_if_empty
 from app.routes.customers import router as customers_router
 from app.routes.simulations import router as simulations_router
+from app.routes.stats import router as stats_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -64,6 +65,7 @@ async def log_requests(request: Request, call_next):
 
 app.include_router(customers_router)
 app.include_router(simulations_router)
+app.include_router(stats_router)
 
 
 @app.get("/health")

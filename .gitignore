@@ -22,3 +22,19 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude Code (dev tool — local config only)
+.claude/settings.local.json
+
+# MCP tool configs
+.playwright-mcp/
+
+# Design reference images (root level, not part of source)
+app-base.png
+design-export-full.png
+design-mockup-full.png
+design-wide.png
+Screenshot*.png
+
+# Original brief document
+Diseño front Angular para prueba técnica/

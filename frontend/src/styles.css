@@ -1,0 +1,111 @@
+/* ── Design tokens ──────────────────────────────────────────────── */
+:root {
+  --accent:          #f2a33c;
+  --accent-hover:    #e8922a;
+  --accent-dim:      rgba(242, 163, 60, 0.12);
+
+  --surface-bg:      #0b0d10;
+  --surface-card:    #141619;
+  --surface-raised:  #1e2126;
+
+  --text-primary:    #e8eaed;
+  --text-secondary:  #9ca3af;
+  --text-muted:      #6b7280;
+
+  --border:          #2d3139;
+  --border-subtle:   #1e2329;
+
+  --plan-starter:     #6b7280;
+  --plan-professional:#3b82f6;
+  --plan-enterprise:  #8b5cf6;
+
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Reset ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--surface-bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--surface-bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Material overrides ─────────────────────────────────────────── */
+.mat-mdc-form-field-subscript-wrapper { margin-top: 2px !important; }
+
+.mat-mdc-outlined-button { border-color: var(--border) !important; }
+
+.mdc-text-field--outlined .mdc-notched-outline__leading,
+.mdc-text-field--outlined .mdc-notched-outline__notch,
+.mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-color: var(--border) !important;
+}
+
+/* ── Snackbar ───────────────────────────────────────────────────── */
+.snack-error .mdc-snackbar__surface {
+  background: #2a1215 !important;
+  border: 1px solid #5c2b2e;
+  color: #ff8a80 !important;
+}
+
+/* ── Utility classes ────────────────────────────────────────────── */
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+
+.plan-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: capitalize;
+}
+
+.plan-badge--starter     { background: rgba(107,114,128,0.2); color: #9ca3af; }
+.plan-badge--professional{ background: rgba(59,130,246,0.2);  color: #60a5fa; }
+.plan-badge--enterprise  { background: rgba(139,92,246,0.2);  color: #a78bfa; }
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-raised) 25%, var(--border) 50%, var(--surface-raised) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.text-accent  { color: var(--accent); }
+.text-muted   { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }

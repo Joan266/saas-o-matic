@@ -1,0 +1,152 @@
+@if (loading()) {
+  <!-- Loading skeleton -->
+  <div class="detail">
+    <div class="breadcrumb skeleton" style="height:16px;width:180px;margin-bottom:1.75rem"></div>
+    <div class="header-card card">
+      <div class="skeleton avatar-lg"></div>
+      <div style="flex:1">
+        <div class="skeleton" style="height:24px;width:200px;margin-bottom:10px"></div>
+        <div class="skeleton" style="height:18px;width:80px"></div>
+      </div>
+    </div>
+    <div class="info-grid">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="info-cell card">
+          <div class="skeleton" style="height:12px;width:80px;margin-bottom:8px"></div>
+          <div class="skeleton" style="height:18px;width:120px"></div>
+        </div>
+      }
+    </div>
+    <div class="card">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton sim-skeleton"></div>
+      }
+    </div>
+  </div>
+
+} @else if (customer()) {
+  <div class="detail">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a routerLink="/" class="breadcrumb__link">Clientes</a>
+      <span class="breadcrumb__sep">/</span>
+      <span class="breadcrumb__current">{{ customer()!.company }}</span>
+    </nav>
+
+    <!-- Header card -->
+    <div class="header-card card">
+      <div class="avatar-lg" [style.background]="avatarColor(customer()!.company)">
+        {{ initials(customer()!.company) }}
+      </div>
+      <div class="header-card__info">
+        <h1 class="header-card__company">{{ customer()!.company }}</h1>
+      </div>
+      <a class="btn-primary" [routerLink]="['/customers', customer()!.id, 'simulate']">
+        + Nueva simulación
+      </a>
+    </div>
+
+    <!-- Info grid -->
+    <div class="info-grid">
+      <div class="info-cell card">
+        <span class="info-cell__label">ID Fiscal</span>
+        <span class="info-cell__value mono">{{ customer()!.fiscalId }}</span>
+      </div>
+      <div class="info-cell card">
+        <span class="info-cell__label">Email</span>
+        <span class="info-cell__value">{{ customer()!.email }}</span>
+      </div>
+      <div class="info-cell card">
+        <span class="info-cell__label">País / IVA</span>
+        <span class="info-cell__value">
+          {{ countryLabel(customer()!.country) }}
+          <span class="text-muted"> · {{ taxRate(customer()!.country) }}%</span>
+        </span>
+      </div>
+      <div class="info-cell card">
+        <span class="info-cell__label">Última factura simulada</span>
+        <span class="info-cell__value">{{ lastSim() }}</span>
+      </div>
+      <div class="info-cell card">
+        <span class="info-cell__label">Plan</span>
+        <span [class]="'plan-badge plan-badge--' + customer()!.plan">{{ customer()!.plan }}</span>
+      </div>
+    </div>
+
+    <!-- Simulation history -->
+    <div class="sim-section card">
+      <div class="sim-section__header">
+        <h2 class="sim-section__title">Historial de simulaciones</h2>
+      </div>
+
+      @if (simulations().length === 0) {
+        <div class="empty-sims">
+          <p class="empty-sims__text">Este cliente aún no tiene simulaciones.</p>
+          <a class="btn-link" [routerLink]="['/customers', customer()!.id, 'simulate']">
+            Crear la primera →
+          </a>
+        </div>
+      } @else {
+        <div class="sim-table">
+          <div class="sim-header">
+            <span>FECHA</span>
+            <span>USUARIOS</span>
+            <span>ALMACENAMIENTO</span>
+            <span>LLAMADAS API</span>
+            <span>TOTAL</span>
+            <span></span>
+          </div>
+          @for (sim of simulations(); track sim.id) {
+            <div class="sim-row-wrapper">
+              <button type="button" class="sim-row" (click)="toggleExpand(sim.id)" [attr.aria-expanded]="expandedSimId() === sim.id">
+                <span class="sim-date">{{ formatDate(sim.createdAt) }}</span>
+                <span>{{ sim.activeUsers }} u.</span>
+                <span>{{ sim.storageGb }} GB</span>
+                <span>{{ sim.apiCalls / 1000 | number:'1.0-1' }}k</span>
+                <span class="sim-total text-accent">{{ currency.format(sim.totalCost) }}</span>
+                <span class="sim-open" [class.sim-open--expanded]="expandedSimId() === sim.id">
+                  {{ expandedSimId() === sim.id ? '▲' : '▼' }}
+                </span>
+              </button>
+
+              @if (expandedSimId() === sim.id) {
+                <div class="sim-breakdown">
+                  @for (tier of tierBreakdown(sim); track tier.label) {
+                    <div class="breakdown-row">
+                      <span class="breakdown-label">{{ tier.label }}</span>
+                      <span class="breakdown-detail">
+                        {{ tier.users }} u. × {{ tier.rate }}€
+                      </span>
+                      <span class="breakdown-subtotal">
+                        {{ currency.format(tier.subtotal) }}
+                      </span>
+                    </div>
+                  }
+                  <div class="breakdown-row breakdown-row--total">
+                    <span>Coste base</span>
+                    <span></span>
+                    <span class="breakdown-subtotal">{{ currency.format(sim.baseCost) }}</span>
+                  </div>
+                  <div class="breakdown-row">
+                    <span class="text-muted">IVA ({{ (sim.taxRate * 100) | number:'1.0-0' }}%)</span>
+                    <span></span>
+                    <span class="breakdown-subtotal text-muted">
+                      {{ currency.format(sim.totalCost - sim.baseCost) }}
+                    </span>
+                  </div>
+                  <div class="breakdown-row breakdown-row--final">
+                    <span>Total mensual</span>
+                    <span></span>
+                    <span class="breakdown-subtotal text-accent">{{ currency.format(sim.totalCost) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+}

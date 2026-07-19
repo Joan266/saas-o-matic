@@ -1,4 +1,10 @@
 {
+  "mcpServers": {
+    "angular": {
+      "command": "npx",
+      "args": ["@angular/cli", "mcp"]
+    }
+  },
   "hooks": {
     "PostToolUse": [
       {

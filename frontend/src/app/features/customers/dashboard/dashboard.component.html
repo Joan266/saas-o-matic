@@ -1,0 +1,127 @@
+<div class="dashboard">
+
+  <!-- Header -->
+  <div class="dashboard__header">
+    <div>
+      <h1 class="dashboard__title">Clientes corporativos</h1>
+      <p class="dashboard__subtitle">Busca un cliente para ver su detalle o lanzar una nueva simulación.</p>
+    </div>
+  </div>
+
+  <!-- Search + CTA -->
+  <div class="dashboard__search-row">
+    <div class="search-box">
+      <svg class="search-box__icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+        <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <input
+        class="search-box__input"
+        type="text"
+        placeholder="Buscar por nombre de empresa o identificador fiscal..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+      />
+    </div>
+    <a class="btn-primary" routerLink="/customers/new">+ Nuevo cliente</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-card__label">Clientes registrados</span>
+      @if (loading()) {
+        <div class="skeleton" style="height:2rem;width:60px;margin-top:.5rem"></div>
+      } @else {
+        <span class="stat-card__value">{{ customers().length }}</span>
+      }
+    </div>
+    <div class="stat-card">
+      <span class="stat-card__label">Simulaciones guardadas</span>
+      @if (loading() || stats() === null) {
+        <div class="skeleton" style="height:2rem;width:60px;margin-top:.5rem"></div>
+      } @else {
+        <span class="stat-card__value">{{ stats()!.totalSimulations }}</span>
+      }
+    </div>
+    <div class="stat-card stat-card--accent">
+      <span class="stat-card__label">MRR simulado ({{ currency.currentCurrency() }})</span>
+      @if (loading() || stats() === null) {
+        <div class="skeleton" style="height:2rem;width:120px;margin-top:.5rem"></div>
+      } @else {
+        <span class="stat-card__value stat-card__value--accent">{{ currency.format(stats()!.totalMrr) }}</span>
+      }
+    </div>
+  </div>
+
+  <!-- Customer table -->
+  <div class="customer-table">
+
+    <!-- Loading skeleton -->
+    @if (loading()) {
+      <div class="table-header">
+        <span>EMPRESA</span><span>ID. FISCAL</span><span>PAÍS</span><span>PLAN</span><span>ÚLT. SIMULACIÓN</span><span></span>
+      </div>
+      @for (i of [1,2,3]; track i) {
+        <div class="table-row">
+          <div class="company-cell">
+            <div class="skeleton avatar"></div>
+            <div style="flex:1">
+              <div class="skeleton" style="height:14px;width:140px;margin-bottom:6px"></div>
+              <div class="skeleton" style="height:12px;width:100px"></div>
+            </div>
+          </div>
+          <div class="skeleton" style="height:14px;width:90px"></div>
+          <div class="skeleton" style="height:14px;width:80px"></div>
+          <div class="skeleton" style="height:22px;width:60px;border-radius:20px"></div>
+          <div class="skeleton" style="height:14px;width:80px"></div>
+          <div></div>
+        </div>
+      }
+
+    <!-- Empty state -->
+    } @else if (filteredCustomers().length === 0) {
+      <div class="empty-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" class="empty-state__icon">
+          <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
+          <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        @if (searchQuery()) {
+          <p class="empty-state__title">Sin resultados para «{{ searchQuery() }}»</p>
+          <p class="empty-state__sub">Prueba con el identificador fiscal o da de alta al cliente.</p>
+        } @else {
+          <p class="empty-state__title">No hay clientes todavía</p>
+          <p class="empty-state__sub">Crea el primer cliente corporativo.</p>
+        }
+        <a class="btn-primary" routerLink="/customers/new">+ Nuevo cliente</a>
+      </div>
+
+    <!-- Data -->
+    } @else {
+      <div class="table-header">
+        <span>EMPRESA</span><span>ID. FISCAL</span><span>PAÍS</span><span>PLAN</span><span>ÚLT. SIMULACIÓN</span><span></span>
+      </div>
+      @for (c of filteredCustomers(); track c.id) {
+        <div class="table-row" [routerLink]="['/customers', c.id]">
+          <div class="company-cell">
+            <div class="avatar" [style.background]="avatarColor(c.company)">
+              {{ initials(c.company) }}
+            </div>
+            <div class="company-info">
+              <span class="company-info__name">{{ c.company }}</span>
+              <span class="company-info__email">{{ c.email }}</span>
+            </div>
+          </div>
+          <span class="fiscal-id">{{ c.fiscalId }}</span>
+          <span class="country">{{ countryLabel(c.country) }}</span>
+          <span [class]="'plan-badge plan-badge--' + c.plan">{{ c.plan }}</span>
+          <span class="last-sim text-muted">{{ formatLastSim(c.lastSimulationAt) }}</span>
+          <a class="ver-link" [routerLink]="['/customers', c.id]" (click)="$event.stopPropagation()">
+            Ver →
+          </a>
+        </div>
+      }
+    }
+
+  </div>
+</div>

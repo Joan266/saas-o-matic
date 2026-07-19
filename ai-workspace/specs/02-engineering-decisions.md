@@ -97,9 +97,12 @@ Merge a main solo cuando la feature tiene tests y funciona end-to-end.
 
 **Frontend:**
 - `trackBy` en `*ngFor` de listas de clientes y simulaciones
-- Debounce 300ms en buscador
+- Búsqueda de clientes: filtro local con `computed()` sobre el array en memoria.
+  Decisión: una herramienta interna con decenas de clientes no justifica una llamada
+  HTTP por búsqueda. Carga única al init, filtrado instantáneo sin red.
 - `takeUntilDestroyed()` en todos los Observables
-- Exchange rate: fetch único al init, sin polling
+- Exchange rate: fetch único al init con `timeout(5000)` y `retry(2)`.
+  Si la API externa falla tras 3 intentos, la app opera en EUR (fallback seguro).
 
 ## 9. Tests de rendimiento
 
@@ -112,3 +115,44 @@ El slider de simulación no debe provocar más de 1 ciclo por movimiento.
 ## 10. Mock data con edge cases
 
 Ver `ai-workspace/specs/03-mock-data.md`
+
+---
+
+## 11. Control de divisa — punto único en navbar
+
+**Decisión:** El selector global del navbar es el único punto de control de divisa.
+
+Los componentes `CustomerDetail` y `SimulationForm` tenían tabs locales `['EUR','USD','GBP']`
+hardcodeadas — redundantes con el navbar y con solo 3 de las 7 divisas disponibles.
+Se eliminaron. Todos los componentes consumen `CurrencyService.currentCurrency()` via Signal.
+
+## 12. Formulario de simulación — solo slider de usuarios
+
+**Decisión:** El formulario de simulación tiene únicamente el slider de usuarios activos.
+
+El documento original pide: *"Un slider o controles dinámicos para ajustar la cantidad
+de usuarios"*. Los sliders de storage (1–1000 GB) y API calls (0–1M) no están pedidos
+en la UI. Se mantienen en el modelo de datos del backend (el endpoint los acepta con
+valores por defecto) pero no se exponen en el formulario — evita confundir al usuario
+con controles que no afectan al precio.
+
+## 13. Input numérico + slider sincronizados
+
+**Decisión:** El slider de usuarios (1–200) se complementa con un input numérico sin límite.
+
+El slider cubre el rango visual frecuente. El input permite simular empresas grandes
+(500, 1000+ usuarios) sin límite artificial. Ambos se sincronizan: el slider se mueve
+hasta su máximo (200) cuando el input supera ese valor, pero el cálculo usa siempre
+el valor real del signal.
+
+## 14. GET /stats — endpoint de aggregados del dashboard
+
+**Decisión:** Endpoint dedicado para los tres KPIs del dashboard.
+
+Alternativas consideradas:
+- Calcular en frontend desde la lista de clientes → imposible sin datos de simulaciones
+- N+1 queries (una por cliente para sus simulaciones) → descartado por ineficiencia
+- JOIN en `GET /customers` → solo sirve para `last_simulation_at`, no para totales globales
+
+`GET /stats` hace 3 queries SQL simples y devuelve `total_customers`, `total_simulations`
+y `total_mrr` (suma de la simulación más reciente por cliente).
