@@ -3,6 +3,10 @@ export type Currency = 'EUR' | 'USD' | 'GBP' | 'MXN' | 'JPY' | 'CHF' | 'CAD';
 
 export const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'MXN', 'JPY', 'CHF', 'CAD'];
 
+export const CURRENCY_SYMBOLS: Record<Currency, string> = {
+  EUR: '€', USD: '$', GBP: '£', MXN: '$', JPY: '¥', CHF: 'Fr', CAD: '$',
+};
+
 export const COUNTRY_LABELS: Record<string, string> = {
   ES: '🇪🇸 España',
   DE: '🇩🇪 Alemania',

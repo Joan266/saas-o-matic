@@ -31,7 +31,6 @@ export function getTierBreakdown(activeUsers: number): TierBreakdown[] {
 
   const result: TierBreakdown[] = [];
   let remaining = activeUsers;
-  let start = 1;
 
   const defs = [
     { cap: 10 as number | null, rate: 10, label: '1–10' },
@@ -44,7 +43,6 @@ export function getTierBreakdown(activeUsers: number): TierBreakdown[] {
     const chunk = cap !== null ? Math.min(remaining, cap) : remaining;
     result.push({ label: `Tramo ${label}`, users: chunk, rate, subtotal: chunk * rate });
     remaining -= chunk;
-    start += chunk;
   }
 
   return result;

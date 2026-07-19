@@ -7,6 +7,7 @@ import { ApiService } from '../../../core/services/api.service';
 import { CurrencyService } from '../../../core/services/currency.service';
 import { Customer, Simulation, COUNTRY_LABELS, TAX_RATES } from '../../../core/models/types';
 import { getTierBreakdown, TierBreakdown } from '../../../shared/utils/billing.utils';
+import { avatarColor, initials } from '../../../shared/utils/avatar.utils';
 
 @Component({
   selector: 'app-customer-detail',
@@ -27,16 +28,15 @@ export class CustomerDetailComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly expandedSimId = signal<number | null>(null);
 
+  // Simulations arrive newest-first (backend ORDER BY created_at DESC)
   protected readonly lastSim = computed(() => {
     const sims = this.simulations();
     if (!sims.length) return '—';
-    return new Date(sims[sims.length - 1].createdAt).toLocaleDateString('es-ES');
+    return new Date(sims[0].createdAt).toLocaleDateString('es-ES');
   });
 
-  protected readonly avatarColors = [
-    '#c84b31', '#2e4057', '#1b6ca8', '#4a235a', '#1e5631',
-    '#7d3c98', '#1a5276', '#784212', '#1b4f72', '#4a235a',
-  ];
+  protected readonly avatarColor = avatarColor;
+  protected readonly initials = initials;
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -77,14 +77,5 @@ export class CustomerDetailComponent implements OnInit {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     });
-  }
-
-  protected avatarColor(company: string): string {
-    const idx = company.charCodeAt(0) % this.avatarColors.length;
-    return this.avatarColors[idx];
-  }
-
-  protected initials(company: string): string {
-    return company.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
   }
 }

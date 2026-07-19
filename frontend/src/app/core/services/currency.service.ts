@@ -2,7 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { retry, timeout } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { Currency, CURRENCIES } from '../models/types';
+import { Currency, CURRENCIES, CURRENCY_SYMBOLS } from '../models/types';
 
 export type { Currency };
 export { CURRENCIES };
@@ -22,12 +22,7 @@ export class CurrencyService {
   readonly error = signal<string | null>(null);
   readonly lastUpdated = signal<Date | null>(null);
 
-  readonly currencySymbol = computed(() => {
-    const symbols: Record<Currency, string> = {
-      EUR: '€', USD: '$', GBP: '£', MXN: '$', JPY: '¥', CHF: 'Fr', CAD: '$',
-    };
-    return symbols[this.currentCurrency()];
-  });
+  readonly currencySymbol = computed(() => CURRENCY_SYMBOLS[this.currentCurrency()]);
 
   loadRates(): void {
     this.loading.set(true);

@@ -91,7 +91,7 @@ class TestCreateCustomer:
             },
         )
         assert res.status_code == 422
-        body = res.json()["detail"]
+        body = res.json()
         assert body["code"] == "FISCAL_ID_INVALID"
         assert "inválido" in body["detail"]
 

@@ -28,108 +28,110 @@
       <span class="breadcrumb__current">Nueva simulación</span>
     </nav>
 
-    <div class="panels">
+    <form (ngSubmit)="onSave()">
+      <div class="panels">
 
-      <!-- LEFT: Sliders -->
-      <div class="panel card">
-        <h2 class="panel__title">Parámetros de uso</h2>
+        <!-- LEFT: Sliders -->
+        <div class="panel card">
+          <h2 class="panel__title">Parámetros de uso</h2>
 
-        <!-- Users slider -->
-        <div class="slider-group">
-          <div class="slider-header">
-            <label class="slider-label">Usuarios activos</label>
-            <input
-              type="number"
-              class="users-input"
-              min="1"
-              [value]="activeUsers()"
-              aria-label="Número de usuarios activos"
-              (input)="onUsersInputChange($event)"
-            />
-          </div>
+          <!-- Users slider -->
+          <div class="slider-group">
+            <div class="slider-header">
+              <label class="slider-label">Usuarios activos</label>
+              <input
+                type="number"
+                class="users-input"
+                min="1"
+                [value]="activeUsers()"
+                aria-label="Número de usuarios activos"
+                (input)="onUsersInputChange($event)"
+              />
+            </div>
 
-          <div class="slider-track-wrapper">
-            <input
-              type="range"
-              class="slider"
-              min="1"
-              [max]="sliderMax"
-              step="1"
-              [value]="sliderValue()"
-              aria-label="Usuarios activos (slider)"
-              (input)="onUsersChange($event)"
-            />
-            <!-- Tier markers -->
-            <div class="tier-markers">
-              <div class="tier-marker" [style.left]="tier1Pct">
-                <span class="tier-marker__label">10</span>
+            <div class="slider-track-wrapper">
+              <input
+                type="range"
+                class="slider"
+                min="1"
+                [max]="sliderMax"
+                step="1"
+                [value]="sliderValue()"
+                aria-label="Usuarios activos (slider)"
+                (input)="onUsersChange($event)"
+              />
+              <!-- Tier markers -->
+              <div class="tier-markers">
+                <div class="tier-marker" [style.left]="tier1Pct">
+                  <span class="tier-marker__label">10</span>
+                </div>
+                <div class="tier-marker" [style.left]="tier2Pct">
+                  <span class="tier-marker__label">50</span>
+                </div>
               </div>
-              <div class="tier-marker" [style.left]="tier2Pct">
-                <span class="tier-marker__label">50</span>
-              </div>
+            </div>
+
+            <!-- Tier breakdown preview -->
+            <div class="tier-preview">
+              @for (tier of tierBreakdown(); track tier.label) {
+                <div class="tier-row">
+                  <span class="tier-row__label">{{ tier.label }}</span>
+                  <span class="tier-row__detail">{{ tier.users }} u. × {{ tier.rate }}€ (EUR)</span>
+                  <span class="tier-row__cost">{{ currency.format(tier.subtotal) }}</span>
+                </div>
+              }
             </div>
           </div>
 
-          <!-- Tier breakdown preview -->
-          <div class="tier-preview">
-            @for (tier of tierBreakdown(); track tier.label) {
-              <div class="tier-row">
-                <span class="tier-row__label">{{ tier.label }}</span>
-                <span class="tier-row__detail">{{ tier.users }} u. × {{ tier.rate }}€</span>
-                <span class="tier-row__cost">{{ tier.subtotal | number:'1.2-2' }}€</span>
-              </div>
-            }
+        </div>
+
+        <!-- RIGHT: Projection -->
+        <div class="panel panel--right card">
+          <h2 class="panel__title">Proyección mensual</h2>
+
+          <div class="total-display">
+            <span class="total-display__amount">{{ totalDisplay() }}</span>
+            <span class="total-display__period">/ mes</span>
+          </div>
+
+          <div class="cost-breakdown">
+            <div class="cost-row">
+              <span class="cost-row__label">Coste base</span>
+              <span class="cost-row__value">{{ currency.format(baseCost()) }}</span>
+            </div>
+            <div class="cost-row">
+              <span class="cost-row__label">IVA ({{ taxRate() * 100 | number:'1.0-0' }}%)</span>
+              <span class="cost-row__value text-muted">{{ currency.format(taxAmount()) }}</span>
+            </div>
+            <div class="cost-divider"></div>
+            <div class="cost-row cost-row--total">
+              <span class="cost-row__label">Total mensual</span>
+              <span class="cost-row__value text-accent">{{ currency.format(totalEur()) }}</span>
+            </div>
+          </div>
+
+          @if (currency.currentCurrency() !== 'EUR') {
+            <p class="exchange-note">
+              Tipo de cambio aproximado. La factura se emite en EUR.
+            </p>
+          }
+
+          <div class="form-actions">
+            <a
+              class="btn-secondary"
+              [routerLink]="['/customers', customer()!.id]"
+            >Descartar</a>
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="saving()"
+            >
+              @if (saving()) { Guardando... } @else { Guardar simulación }
+            </button>
           </div>
         </div>
 
       </div>
-
-      <!-- RIGHT: Projection -->
-      <div class="panel panel--right card">
-        <h2 class="panel__title">Proyección mensual</h2>
-
-        <div class="total-display">
-          <span class="total-display__amount">{{ totalDisplay() }}</span>
-          <span class="total-display__period">/ mes</span>
-        </div>
-
-        <div class="cost-breakdown">
-          <div class="cost-row">
-            <span class="cost-row__label">Coste base</span>
-            <span class="cost-row__value">{{ currency.format(baseCost()) }}</span>
-          </div>
-          <div class="cost-row">
-            <span class="cost-row__label">IVA ({{ taxRate() * 100 | number:'1.0-0' }}%)</span>
-            <span class="cost-row__value text-muted">{{ currency.format(taxAmount()) }}</span>
-          </div>
-          <div class="cost-divider"></div>
-          <div class="cost-row cost-row--total">
-            <span class="cost-row__label">Total mensual</span>
-            <span class="cost-row__value text-accent">{{ currency.format(totalEur()) }}</span>
-          </div>
-        </div>
-
-        @if (currency.currentCurrency() !== 'EUR') {
-          <p class="exchange-note">
-            Tipo de cambio aproximado. La factura se emite en EUR.
-          </p>
-        }
-
-        <div class="form-actions">
-          <a
-            class="btn-secondary"
-            [routerLink]="['/customers', customer()!.id]"
-          >Descartar</a>
-          <button
-            class="btn-primary"
-            [disabled]="saving()"
-            (click)="onSave()"
-          >
-            @if (saving()) { Guardando... } @else { Guardar simulación }
-          </button>
-        </div>
-      </div>
-
-    </div>
+    </form>
   </div>
 }

@@ -1,6 +1,6 @@
 import { Component, inject, signal, HostListener, ElementRef } from '@angular/core';
 import { CurrencyService } from '../../../core/services/currency.service';
-import { CURRENCIES, Currency } from '../../../core/models/types';
+import { CURRENCIES, CURRENCY_SYMBOLS, Currency } from '../../../core/models/types';
 
 @Component({
   selector: 'app-currency-selector',
@@ -96,9 +96,7 @@ export class CurrencySelectorComponent {
 
   protected readonly open = signal(false);
   protected readonly currencies: Currency[] = CURRENCIES;
-  protected readonly symbols: Record<Currency, string> = {
-    EUR: '€', USD: '$', GBP: '£', MXN: '$', JPY: '¥', CHF: 'Fr', CAD: '$',
-  };
+  protected readonly symbols = CURRENCY_SYMBOLS;
 
   toggle(): void {
     this.open.update(v => !v);

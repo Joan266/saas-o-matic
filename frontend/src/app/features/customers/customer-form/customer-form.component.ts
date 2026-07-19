@@ -47,10 +47,11 @@ export class CustomerFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Re-validate fiscalId when country changes
+    // Re-validate fiscalId when country changes — updateValueAndValidity triggers
+    // the fiscalId validator AND the valueChanges subscription below, so
+    // runFiscalValidation() is called once via fiscalId.valueChanges, not twice.
     this.form.get('country')!.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.form.get('fiscalId')!.updateValueAndValidity();
-      this.runFiscalValidation();
     });
 
     this.form.get('fiscalId')!.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {

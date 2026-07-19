@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Customer, CustomerCreate, Simulation, SimulationCreate, Stats } from '../models/types';
@@ -67,11 +67,9 @@ export class ApiService {
     };
   }
 
-  getCustomers(q?: string): Observable<Customer[]> {
-    let params = new HttpParams();
-    if (q) params = params.set('q', q);
+  getCustomers(): Observable<Customer[]> {
     return this.http
-      .get<CustomerRaw[]>(`${this.base}/customers`, { params })
+      .get<CustomerRaw[]>(`${this.base}/customers`)
       .pipe(map(rows => rows.map(r => this.toCustomer(r))));
   }
 

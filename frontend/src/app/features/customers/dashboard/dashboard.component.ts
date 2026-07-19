@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { CurrencyService } from '../../../core/services/currency.service';
 import { Customer, Stats, COUNTRY_LABELS } from '../../../core/models/types';
+import { avatarColor, initials } from '../../../shared/utils/avatar.utils';
 
 @Component({
   selector: 'app-dashboard',
@@ -35,24 +36,8 @@ export class DashboardComponent implements OnInit {
   protected readonly countryLabel = (code: string) =>
     COUNTRY_LABELS[code] ?? code;
 
-  protected readonly avatarColors = [
-    '#c84b31', '#2e4057', '#1b6ca8', '#4a235a', '#1e5631',
-    '#7d3c98', '#1a5276', '#784212', '#1b4f72', '#4a235a',
-  ];
-
-  avatarColor(company: string): string {
-    const idx = company.charCodeAt(0) % this.avatarColors.length;
-    return this.avatarColors[idx];
-  }
-
-  initials(company: string): string {
-    return company
-      .split(' ')
-      .slice(0, 2)
-      .map(w => w[0])
-      .join('')
-      .toUpperCase();
-  }
+  protected readonly avatarColor = avatarColor;
+  protected readonly initials = initials;
 
   ngOnInit(): void {
     this.api.getStats()

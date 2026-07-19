@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angula
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { CurrencyService } from '../../../core/services/currency.service';
 import { Customer, TAX_RATES } from '../../../core/models/types';
@@ -10,7 +11,7 @@ import { calcBaseCost, getTierBreakdown, TierBreakdown } from '../../../shared/u
 @Component({
   selector: 'app-simulation-form',
   standalone: true,
-  imports: [RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe, FormsModule],
   templateUrl: './simulation-form.component.html',
   styleUrl: './simulation-form.component.css',
 })
@@ -65,8 +66,14 @@ export class SimulationFormComponent implements OnInit {
   }
 
   protected onUsersInputChange(event: Event): void {
-    const val = Number((event.target as HTMLInputElement).value);
-    if (val >= 1) this.activeUsers.set(Math.floor(val));
+    const input = event.target as HTMLInputElement;
+    const val = Number(input.value);
+    if (val >= 1) {
+      this.activeUsers.set(Math.floor(val));
+    } else {
+      // Reset the visible input to 1 so it stays in sync with the signal
+      input.value = '1';
+    }
   }
 
   protected onSave(): void {
@@ -76,7 +83,7 @@ export class SimulationFormComponent implements OnInit {
     this.api.createSimulation({
       customerId: this.customer()!.id,
       activeUsers: this.activeUsers(),
-      storageGb: 1,
+      storageGb: 1,   // storage_gb and api_calls not implemented in this version
       apiCalls: 0,
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
