@@ -186,7 +186,7 @@ Devuelve el historial de simulaciones de un cliente, orden desc por fecha.
 ## 5. Vistas del frontend (Angular)
 
 ### Vista 1 — Dashboard
-- Buscador en tiempo real (filtra al escribir, llama a `GET /customers?q=`)
+- Buscador en tiempo real (filtra al escribir, **filtro local con `computed()`** sobre la lista ya cargada — no llama al backend)
 - Listado de clientes en cards o tabla
 - Botón "Nuevo cliente" → abre formulario (modal o página nueva)
 - Selector de divisa visible en el header (aplica a toda la app)
@@ -198,8 +198,8 @@ Devuelve el historial de simulaciones de un cliente, orden desc por fecha.
 
 ### Vista 3 — Formulario de simulación
 - Slider para usuarios activos (1–200)
-- Slider para storage GB (1–1000)
-- Slider para API calls (1.000–1.000.000)
+- ~~Slider para storage GB~~ — eliminado (se envía fijo: 1 GB)
+- ~~Slider para API calls~~ — eliminado (se envía fijo: 0)
 - Preview en tiempo real del coste base (calculado en frontend con la misma lógica de tramos)
 - Al guardar → llama a `POST /simulations` y refresca el historial
 
@@ -216,8 +216,8 @@ Devuelve el historial de simulaciones de un cliente, orden desc por fecha.
 |------------|-------------------------------------------------|
 | Backend    | Python 3.12 + FastAPI                           |
 | Base datos | SQLite (archivo local, sin ORM)                 |
-| Frontend   | Angular 22 (standalone, selectorless, Signals)  |
-| HTTP       | HttpClient / httpResource() de Angular          |
+| Frontend   | Angular 21 (standalone, Signals)                |
+| HTTP       | HttpClient                                      |
 | Estilos    | Angular Material                                |
 | Estado     | Angular Signals                                 |
 | Divisa API | open.er-api.com (pública, sin key, caché 24h)   |
@@ -336,8 +336,8 @@ httpx==0.27.0          # para TestClient de FastAPI
 
 ### Frontend
 ```
-@angular/core: ^22.0.0
-@angular/material: ^22.0.0
+@angular/core: ^21.0.0
+@angular/material: ^21.0.0
 ```
 
 ---
